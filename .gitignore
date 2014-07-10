@@ -1,0 +1,9 @@
+*.fasl
+*~
+*.FASL
+*.~lock*
+\#*\#
+*.abcl
+*.fas
+*.lib
+*.lx64fsl
