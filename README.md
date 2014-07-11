@@ -7,10 +7,10 @@ A modern OpenGL networked battleship game meant to be a working implementation o
 
 #How to Play
 
-- Left click places ships your field and fires missiles in the enemy's field
+- Left click in your field to place ships 
 - Left click a ship to remove it
 - Right click a ship to rotate its orientation
-
+- Left click in the enemy's field to fire missiles
 
 #How to Run
 

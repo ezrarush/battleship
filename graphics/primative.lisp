@@ -70,6 +70,71 @@
     (gl:disable-vertex-attrib-array 1)
     (gl:disable-vertex-attrib-array 2)))
 
+(defclass circle ()
+  ((vertex-buffer)
+   (technique)
+   (vertex-count
+    :initarg :vertex-count
+    :initform 32)))
+
+(defgeneric circle-render (circle projection-transform model-view-transform color))
+
+(defmethod initialize-instance :after ((self circle) &key)
+  (with-slots (vertex-buffer technique vertex-count) self
+    (let ((arr (gl:alloc-gl-array :float (* vertex-count 8)))
+	  (i 0))
+      ;; circle center at (0.0 0.0 0.0) plus the tex and normal coords set to 0.0 for now
+      (loop repeat 8 do
+	(setf (gl:glaref arr i) 0.0)
+	(incf i))
+      (dotimes (x (- vertex-count 1))
+	(let* ((percent (/ x (- vertex-count 2)))
+	       (radian (* percent pi 2)))
+	  ;; positios x
+	  (setf (gl:glaref arr i) (ensure-float (cos radian)))
+	  (incf i)
+	  ;; position y
+	  (setf (gl:glaref arr i) (ensure-float (sin radian)))
+	  (incf i)
+	  ;; position z
+	  (setf (gl:glaref arr i) 0.0)
+	  (incf i)
+	  ;; tex and normal coords set to 0.0 for now
+	  (loop repeat 5 do
+	    (setf (gl:glaref arr i) 0.0)
+	    (incf i))))
+      (setf vertex-buffer (car (gl:gen-buffers 1)))
+      (gl:bind-buffer :array-buffer vertex-buffer)
+      (gl:buffer-data :array-buffer :static-draw arr)
+      (gl:free-gl-array arr))
+    (setf technique (make-instance 'color-technique :vs-path "/home/quicklisp/local-projects/battleship/shaders/shader.vertexshader" :fs-path "/home/quicklisp/local-projects/battleship/shaders/shader.fragmentshader"))))
+
+(defmethod circle-render ((self circle) projection-transform model-view-transform color)
+    (with-slots (vertex-buffer technique vertex-count) self
+
+    (technique-enable technique)
+
+    (set-projection-transform technique projection-transform)
+    (set-model-view-transform technique model-view-transform)
+    (set-color technique color)
+
+    (gl:bind-buffer :array-buffer vertex-buffer)
+
+    (gl:enable-vertex-attrib-array 0)
+    (gl:enable-vertex-attrib-array 1)
+    (gl:enable-vertex-attrib-array 2)
+    
+    (gl:vertex-attrib-pointer 0 3 :float nil (* (cffi:foreign-type-size :float) 8) (cffi:null-pointer))
+    (gl:vertex-attrib-pointer 1 2 :float nil (* (cffi:foreign-type-size :float) 8) (cffi:make-pointer (* (cffi:foreign-type-size :float) 3)))
+    (gl:vertex-attrib-pointer 2 3 :float nil (* (cffi:foreign-type-size :float) 8) (cffi:make-pointer (* (cffi:foreign-type-size :float) 5)))
+    
+    (gl:draw-arrays :triangle-fan 0 vertex-count)
+      
+    (gl:disable-vertex-attrib-array 0)
+    (gl:disable-vertex-attrib-array 1)
+    (gl:disable-vertex-attrib-array 2))
+  )
+
 (defclass sphere ()
   ((vertex-buffer)
    (technique)

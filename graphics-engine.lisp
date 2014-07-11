@@ -18,26 +18,27 @@
     )
    (pipeline)
    (quad)
-   (sphere)))
+   (circle)))
 
 (defgeneric graphics-init (graphics-engine))
 (defgeneric render-scene (graphics-engine))
 
 (defmethod graphics-init ((tut graphics-engine))
-  (with-slots (pipeline quad sphere ) tut
+  (with-slots (pipeline quad circle) tut
 
     (gl:clear-color 0.0 0.0 0.0 1.0)
-    
+    ;; (gl:polygon-mode :front-and-back :line)
+       
     (setf pipeline (make-instance 'pipeline))
     
     ;; used for fields and shipo
     (setf quad (make-instance 'quad))
     
     ;; used for pings and missiles
-    (setf sphere (make-instance 'sphere))))
+    (setf circle (make-instance 'circle))))
 
 (defmethod render-scene ((tut graphics-engine))
-  (with-slots (pipeline quad sphere) tut
+  (with-slots (pipeline quad circle) tut
     
     (gl:clear :color-buffer-bit)
 
@@ -53,12 +54,12 @@
     (setf (world-pos pipeline) (sb-cga:vec 200.0 0.0 0.0))
     (update-transforms pipeline)
     (quad-render quad (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.0 0.2 0.0))
-    
-    ;; ping
+
+     ;; ping
     (setf (scale pipeline) (sb-cga:vec 60.0 60.0 1.0))
-    (setf (world-pos pipeline) (sb-cga:vec 299.0 -99.0 0.0))
+    (setf (world-pos pipeline) (sb-cga:vec 299.0 -99.0 -1.0))
     (update-transforms pipeline)
-    (sphere-render sphere (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.0 0.3 0.0))
+    (circle-render circle (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.0 0.3 0.0))
     
     (loop for ship in *placed-ships* do
 	 ;; (if (eq (orientation ship) :vertical)
@@ -74,6 +75,6 @@
 	 (setf (scale pipeline) (sb-cga:vec (radius missile) (radius missile) 1.0))
 	 (setf (world-pos pipeline) (pos missile))
 	 (update-transforms pipeline)
-	 (sphere-render sphere (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.6 0.0 0.0))
+	 (circle-render circle (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.6 0.0 0.0))
 	 )
     ))
