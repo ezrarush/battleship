@@ -55,10 +55,12 @@
   "Network loop"
   (if (connected-p)
       (progn
-	(read-messages)
+	
+	;; (read-messages)
 
 	(when (server-p)
-	  (batch-update))
+	  ;; (batch-update)
+	  )
 	)
 
       ;; Nothing is connected, so wait for its connection

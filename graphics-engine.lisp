@@ -42,29 +42,17 @@
     (gl:clear :color-buffer-bit)
 
     ;; field size
-    (setf (scale pipeline) (sb-cga:vec 197.0 196.0 1.0))
+    (setf (scale pipeline) (sb-cga:vec 196.0 196.0 1.0))
 
     ;; player field
-    (setf (world-pos pipeline) (sb-cga:vec -199.0 0.0 0.0))
+    (setf (world-pos pipeline) (sb-cga:vec -200.0 0.0 0.0))
     (update-transforms pipeline)
     (quad-render quad (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.0 0.2 0.0))
     
     ;; enemy field
-    (setf (world-pos pipeline) (sb-cga:vec 199.0 0.0 0.0))
+    (setf (world-pos pipeline) (sb-cga:vec 200.0 0.0 0.0))
     (update-transforms pipeline)
     (quad-render quad (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.0 0.2 0.0))
-    
-    ;; vertical ship
-    (setf (scale pipeline) (sb-cga:vec 6.0 30.0 1.0))
-    (setf (world-pos pipeline) (sb-cga:vec -199.0 0.0 0.0))
-    (update-transforms pipeline)
-    (quad-render quad (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.0 0.4 0.0))
-    
-    ;; horizontal ship
-    (setf (scale pipeline) (sb-cga:vec 30.0 6.0 1.0))
-    (setf (world-pos pipeline) (sb-cga:vec -299.0 0.0 0.0))
-    (update-transforms pipeline)
-    (quad-render quad (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.0 0.4 0.0))
     
     ;; ping
     (setf (scale pipeline) (sb-cga:vec 60.0 60.0 1.0))
@@ -72,18 +60,16 @@
     (update-transforms pipeline)
     (sphere-render sphere (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.0 0.3 0.0))
     
-    ;; ;; missile miss
-    ;; (setf (scale pipeline) (sb-cga:vec 6.0 6.0 1.0))
-    ;; (setf (world-pos pipeline) (sb-cga:vec 99.0 99.0 0.0))
-    ;; (update-transforms pipeline)
-    ;; (sphere-render sphere (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.15 0.0 0.0))
+    (loop for ship in *placed-ships* do
+	 ;; (if (eq (orientation ship) :vertical)
+	 ;;     (setf (scale pipeline) (sb-cga:vec (/ (width ship) 2.0) (/ (height ship) 2.0) 1.0))
+	 ;;     (setf (scale pipeline) (sb-cga:vec (/ (height ship) 2.0) (/ (width ship) 2.0) 1.0))
+	 ;;     )
+	 (setf (scale pipeline) (sb-cga:vec (/ (width ship) 2.0) (/ (height ship) 2.0) 1.0))
+	 (setf (world-pos pipeline) (pos ship))
+	 (update-transforms pipeline)
+	 (quad-render quad (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.0 0.4 0.0)))
     
-    ;; ;; missile hit 
-    ;; (setf (scale pipeline) (sb-cga:vec 6.0 6.0 1.0))
-    ;; (setf (world-pos pipeline) (sb-cga:vec 199.0 0.0 0.0))
-    ;; (update-transforms pipeline)
-    ;; (sphere-render sphere (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.6 0.0 0.0))
-
     (loop for missile in *missiles-fired* do
 	 (setf (scale pipeline) (sb-cga:vec (radius missile) (radius missile) 1.0))
 	 (setf (world-pos pipeline) (pos missile))

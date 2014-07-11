@@ -23,6 +23,7 @@
 				     (:file "server")
 				     (:file "client")))	       
 	       (:file "picking")
+	       (:file "ship")
 	       (:file "missile")
 	       (:file "graphics-engine")
                (:file "battleship")))

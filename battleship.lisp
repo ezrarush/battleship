@@ -44,27 +44,112 @@
 		  
 		  ))
 
-	       (:mousebuttondown (:x x :y y)
-				 (format t "mouse click screen x:~a y:~a~%" x y)
+	       (:mousebuttondown (:x x :y y :button button)
+				 (format t "mouse click screen x:~a y:~a button:~a~%" x y button)
 				 (multiple-value-bind (v1 v2)  (get-3d-ray-under-mouse (ensure-float x) (ensure-float (- *window-height* y)))
 				   (let ((d (or (ray-triangle-collision v1 
 									(sb-cga:vec- v1 v2) 
-									(sb-cga:vec 2.0   -196.0 0.0)
-									(sb-cga:vec 2.0    196.0 0.0)
+									(sb-cga:vec   4.0  196.0 0.0)
+									(sb-cga:vec   4.0 -196.0 0.0)
 									(sb-cga:vec 396.0  196.0 0.0))
 						(ray-triangle-collision v1 
 									(sb-cga:vec- v1 v2)
-									(sb-cga:vec 2.0   -196.0 0.0)
+									(sb-cga:vec   4.0   -196.0 0.0)
 									(sb-cga:vec 396.0 -196.0 0.0)
 									(sb-cga:vec 396.0  196.0 0.0)))))
-				     (when d
-				       (let ((location (sb-cga:vec+ v1 (sb-cga:vec* (sb-cga:vec- v1 v2) d)))
-					     (flag nil))
-					 (format t "3d location x:~a y:~a~%" (aref location 0) (aref location 1))
-					 (loop for missile in *missiles-fired* do
-					      (let ((collision (ray-sphere-collision (pos missile) (radius missile) v1 v2)))
-						(when collision (setf flag t))))
-					 (unless flag (fire-missile location)))))))
+				     (if d
+					 (let ((location (sb-cga:vec+ v1 (sb-cga:vec* (sb-cga:vec- v1 v2) d)))
+					       (flag nil))
+					   (format t "3d location x:~a y:~a~%" (aref location 0) (aref location 1))
+					   (loop for missile in *missiles-fired* do
+						(let ((collision (ray-sphere-collision (pos missile) (* 2 (radius missile)) v1 v2)))
+						  (when collision (setf flag t))))
+					   (unless flag (fire-missile location)))
+					 ;; if click wasn't on the enemy's field, check if it is on player's field 
+					 (let ((d (or (ray-triangle-collision v1 
+									      (sb-cga:vec- v1 v2) 
+									      (sb-cga:vec   -4.0  196.0 0.0)
+									      (sb-cga:vec -396.0  196.0 0.0)
+									      (sb-cga:vec -396.0 -196.0 0.0))
+						      (ray-triangle-collision v1 
+									      (sb-cga:vec- v1 v2)
+									      (sb-cga:vec   -4.0   196.0 0.0)
+									      (sb-cga:vec -396.0 -196.0 0.0)
+									      (sb-cga:vec   -4.0 -196.0 0.0)))))
+					   (if d
+					       (let ((location (sb-cga:vec+ v1 (sb-cga:vec* (sb-cga:vec- v1 v2) d)))
+						     (flag nil))
+						 (format t "3d location x:~a y:~a~%" (aref location 0) (aref location 1))
+						 ;; button 1 places/removes ship, button 3 rotates ship
+						 (if (eql button 1)
+						     (progn
+						       ;; clicking on an existing ship removes it
+						       (loop for ship in *placed-ships* do
+							    (let ((collision (or (ray-triangle-collision 
+										  v1 
+										  (sb-cga:vec- v1 v2) 
+										  (sb-cga:vec (- (aref (pos ship) 0) (/ (width ship) 2.0)) (- (aref (pos ship) 1) (/ (height ship) 2.0)) 0.0)
+										  (sb-cga:vec (+ (aref (pos ship) 0) (/ (width ship) 2.0)) (- (aref (pos ship) 1) (/ (height ship) 2.0)) 0.0)
+										  (sb-cga:vec (+ (aref (pos ship) 0) (/ (width ship) 2.0)) (+ (aref (pos ship) 1) (/ (height ship) 2.0)) 0.0))
+										 (ray-triangle-collision 
+										  v1 
+										  (sb-cga:vec- v1 v2)
+										  (sb-cga:vec (+ (aref (pos ship) 0) (/ (width ship) 2.0)) (+ (aref (pos ship) 1) (/ (height ship) 2.0)) 0.0)
+										  (sb-cga:vec (- (aref (pos ship) 0) (/ (width ship) 2.0)) (+ (aref (pos ship) 1) (/ (height ship) 2.0)) 0.0)
+										  (sb-cga:vec (- (aref (pos ship) 0) (/ (width ship) 2.0)) (- (aref (pos ship) 1) (/ (height ship) 2.0)) 0.0)))))
+							      (when collision 
+								(setf flag t)
+								(remove-ship ship))))
+						       
+						       (loop for ship in *placed-ships* do
+							  ;; stop placement if the ship overlaps with an existing ship 
+							    (let ((overlaps (or (ray-triangle-collision 
+										 v1 
+										 (sb-cga:vec- v1 v2) 
+										 (sb-cga:vec (- (aref (pos ship) 0) (width ship)) (- (aref (pos ship) 1) (height ship)) 0.0)
+										 (sb-cga:vec (+ (aref (pos ship) 0) (width ship)) (- (aref (pos ship) 1) (height ship)) 0.0)
+										 (sb-cga:vec (+ (aref (pos ship) 0) (width ship)) (+ (aref (pos ship) 1) (height ship)) 0.0))
+										(ray-triangle-collision 
+										 v1 
+										 (sb-cga:vec- v1 v2)
+										 (sb-cga:vec (+ (aref (pos ship) 0) (width ship)) (+ (aref (pos ship) 1) (height ship)) 0.0)
+										 (sb-cga:vec (- (aref (pos ship) 0) (width ship)) (+ (aref (pos ship) 1) (height ship)) 0.0)
+										 (sb-cga:vec (- (aref (pos ship) 0) (width ship)) (- (aref (pos ship) 1) (height ship)) 0.0)))))
+							      (when overlaps (setf flag t)))
+							    
+							  ;; place ship only if it does not hang off the player's field
+							    (let ((inside-field (or (ray-triangle-collision 
+										     v1 
+										     (sb-cga:vec- v1 v2) 
+										     (sb-cga:vec (- -4.0 (/ (width ship) 2.0))  (- 196.0 (/ (height ship) 2.0)) 0.0)
+										     (sb-cga:vec (+ -396.0 (/ (width ship) 2.0))  (- 196.0 (/ (height ship) 2.0)) 0.0)
+										     (sb-cga:vec (+ -396.0 (/ (width ship) 2.0)) (+ -196.0 (/ (height ship) 2.0)) 0.0))
+										    (ray-triangle-collision 
+										     v1 
+										     (sb-cga:vec- v1 v2)
+										     (sb-cga:vec (- -4.0 (/ (width ship) 2.0))  (- 196.0 (/ (height ship) 2.0)) 0.0)
+										     (sb-cga:vec (+ -396.0 (/ (width ship) 2.0)) (+ -196.0 (/ (height ship) 2.0)) 0.0)
+										     (sb-cga:vec (- -4.0 (/ (width ship) 2.0)) (+ -196.0 (/ (height ship) 2.0)) 0.0)))))
+							      (unless inside-field (setf flag t))))
+						       
+						       (unless flag (place-ship location))						       
+						       )
+						     (progn
+						       (loop for ship in *placed-ships* do
+							    (let ((collision (or (ray-triangle-collision 
+										  v1 
+										  (sb-cga:vec- v1 v2) 
+										  (sb-cga:vec (- (aref (pos ship) 0) (/ (width ship) 2.0)) (- (aref (pos ship) 1) (/ (height ship) 2.0)) 0.0)
+										  (sb-cga:vec (+ (aref (pos ship) 0) (/ (width ship) 2.0)) (- (aref (pos ship) 1) (/ (height ship) 2.0)) 0.0)
+										  (sb-cga:vec (+ (aref (pos ship) 0) (/ (width ship) 2.0)) (+ (aref (pos ship) 1) (/ (height ship) 2.0)) 0.0))
+										 (ray-triangle-collision 
+										  v1 
+										  (sb-cga:vec- v1 v2)
+										  (sb-cga:vec (+ (aref (pos ship) 0) (/ (width ship) 2.0)) (+ (aref (pos ship) 1) (/ (height ship) 2.0)) 0.0)
+										  (sb-cga:vec (- (aref (pos ship) 0) (/ (width ship) 2.0)) (+ (aref (pos ship) 1) (/ (height ship) 2.0)) 0.0)
+										  (sb-cga:vec (- (aref (pos ship) 0) (/ (width ship) 2.0)) (- (aref (pos ship) 1) (/ (height ship) 2.0)) 0.0)))))
+							      (when collision 
+								(setf (orientation ship) (if (eql (orientation ship) :vertical) :horizontal :vertical))))))))))))))
 
 	       (:idle ()
 		      (setf *current-time* (sdl2:get-ticks))

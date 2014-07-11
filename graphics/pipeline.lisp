@@ -61,9 +61,10 @@
     (setf model-view-transform (sb-cga:matrix* view-transform world-transform))
 
     (setf projection-transform (ortho (/ (projection-info-width proj-info) 2.0) 
-				      (- (/ (projection-info-width proj-info) 2.0)) 
-				      (- (/ (projection-info-height proj-info) 2.0)) 
-				      (/ (projection-info-height proj-info) 2.0) 
-				      (projection-info-z-near proj-info)
-				      (projection-info-z-far proj-info)))))
+    				      (- (/ (projection-info-width proj-info) 2.0)) 
+    				      (- (/ (projection-info-height proj-info) 2.0)) 
+    				      (/ (projection-info-height proj-info) 2.0) 
+    				      (projection-info-z-near proj-info)
+    				      (projection-info-z-far proj-info)))
+    ))
 
