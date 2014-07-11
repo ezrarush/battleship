@@ -1,4 +1,4 @@
-License File for Pong
+License File for Battleship
 
 The MIT License (MIT)
 

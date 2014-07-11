@@ -2,9 +2,9 @@
 
 (asdf:defsystem #:battleship
   :serial t
-  :description "Describe battleship here"
-  :author "Your Name <your.name@example.com>"
-  :license "Specify license here"
+  :description "A modern OpenGL networked battleship game"
+  :author "Ezra Rush <rushwest@gmailcom>"
+  :license "The MIT License (MIT) Copyright (c) 2014 Ezra Rush"
   :depends-on (#:sb-cga
 	       #:cl-opengl
 	       #:sdl2
