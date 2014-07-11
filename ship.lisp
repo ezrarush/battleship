@@ -27,7 +27,7 @@
   (with-slots (width height) self
     (rotatef width height)))
 
-(defmethod intersect-location ((self ship) v1 v2)
+(defmethod ray-intersect ((self ship) v1 v2)
   (with-slots (pos width height) self
     (let* ((half-width (/ width 2.0))
 	   (half-height (/ height 2.0))
@@ -45,6 +45,25 @@
 			 (sb-cga:vec (- (aref pos 0) half-width) (- (aref pos 1) half-height) 0.0)))))
       (when distance
 	;; calculate click location on ship
+	(sb-cga:vec+ v1 (sb-cga:vec* (sb-cga:vec- v1 v2) distance))))))
+
+;; bounding box twice the size of size so that news ships are not placed over this ship
+(defmethod ray-intersect-around ((self ship) v1 v2)
+  (with-slots (pos width height) self
+    (let ((distance (or (ray-triangle-collision 
+			 v1 
+			 (sb-cga:vec- v1 v2) 
+			 (sb-cga:vec (- (aref pos 0) width) (- (aref pos 1) height) 0.0)
+			 (sb-cga:vec (+ (aref pos 0) width) (- (aref pos 1) height) 0.0)
+			 (sb-cga:vec (+ (aref pos 0) width) (+ (aref pos 1) height) 0.0))
+			(ray-triangle-collision 
+			 v1 
+			 (sb-cga:vec- v1 v2)
+			 (sb-cga:vec (+ (aref pos 0) width) (+ (aref pos 1) height) 0.0)
+			 (sb-cga:vec (- (aref pos 0) width) (+ (aref pos 1) height) 0.0)
+			 (sb-cga:vec (- (aref pos 0) width) (- (aref pos 1) height) 0.0)))))
+      (when distance
+	;; calculate click location on or around ship
 	(sb-cga:vec+ v1 (sb-cga:vec* (sb-cga:vec- v1 v2) distance))))))
 
 (defun place-ship (location)
