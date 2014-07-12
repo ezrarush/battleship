@@ -6,7 +6,7 @@
 
 (defun server-p () *server*)
 
-(defvar *client* nil)
+(defvar *clients* nil)
 
 (defun start-server (server-ip port)
   (assert (not *server-socket*))
@@ -20,17 +20,18 @@
   (assert *server-socket*)
   (usocket:socket-close *server-socket*)
   (setf *server-socket* nil
-	*client* nil))
+	*clients* nil))
 
 (defun accept-client ()
   (when (usocket:wait-for-input *server-socket*
 				:timeout 0
 				:ready-only t)
-    (unless *client*
-      (setf *client* (usocket:socket-accept *server-socket*)))))
+    (push (usocket:socket-accept *server-socket*) *clients*)
+    (format t "a client was accepted")
+    ))
 
 (defun batch-update ()
-  (when *client*
+  (when *clients*
     (let ((buffer (userial:make-buffer)))
       (userial:with-buffer buffer
 	(userial:serialize :opcodes :batch-update)
@@ -45,5 +46,5 @@
 	;; (userial:serialize :keyword :ball)
 	;; (serialize buffer *ball*)
 	)
-
-      (send-message *client* buffer))))
+      (loop for client in *clients* do
+	   (send-message client buffer)))))

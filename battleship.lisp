@@ -32,30 +32,22 @@
 		  ()
 		  (setf *current-time* (sdl2:get-ticks))
 		  (setf *delta-time* (ensure-float (- *current-time* *last-time*)))
-		  
 		  (when (>= *delta-time* 10.0)
 		    (incf *last-time* 10))
-
 		  (network)
 		  (when (connected-p)))
-
 		 (:quit () t))
-	    
 	    (stop-server)))
 	(progn
 	  (connect-to-server server-ip port)
 	  (sdl2:with-window (win :title (if (server-p) "Battleship Server" "Battleship Client") :w *window-width* :h *window-height* :flags '(:shown :opengl))
 	    (sdl2:with-gl-context (gl-context win)
 	      (sdl2:gl-make-current win gl-context)
-	      
 	      (setf *graphics-engine* (make-instance 'graphics-engine))
 	      (graphics-init *graphics-engine*)
-	      
 	      (setf *last-time* (sdl2:get-ticks))	      
 	      (unwind-protect
-		   
 		   (sdl2:with-event-loop (:method :poll)
-		     
 		     (:keydown
 		      (:keysym keysym)
 		      (let ((scancode (sdl2:scancode-value keysym))
@@ -91,16 +83,12 @@
 		      ()
 		      (setf *current-time* (sdl2:get-ticks))
 		      (setf *delta-time* (ensure-float (- *current-time* *last-time*)))
-		      
 		      (when (>= *delta-time* 10.0)
 			(incf *last-time* 10))
-
 		      (network)
-		      
 		      (when (connected-p)
 			(render-scene *graphics-engine*)
 			(sdl2:gl-swap-window win)))
-
 		     (:quit () t))
 		
 		(disconnect-from-server))))))))

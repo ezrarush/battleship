@@ -7,7 +7,7 @@
 (userial:make-vector-serializer :coordinate :int32 2)
 
 (defun connected-p ()
-  (or *client*
+  (or *clients*
       *server-connection*))
 
 (defun send-message (to buffer)
@@ -18,24 +18,24 @@
       (write-sequence buffer stream :end (length buffer))
       (force-output stream))))
 
-(defun read-messages ()
-  (let* ((connection (if (server-p)
-			 *client*
-			 *server-connection*))
-	 (buffer     (userial:make-buffer))
-	 (stream     (usocket:socket-stream connection)))
+;; (defun read-messages ()
+;;   (let* ((connection (if (server-p)
+;; 			 *client*
+;; 			 *server-connection*))
+;; 	 (buffer     (userial:make-buffer))
+;; 	 (stream     (usocket:socket-stream connection)))
 
-    ;; Read the size of the message in bytes, then read those bytes
-    (when (listen stream)
-      (userial:with-buffer buffer
-	(let* ((size (read-byte stream)))
-	  (userial:buffer-advance size)
-	  (read-sequence buffer stream :end size))
+;;     ;; Read the size of the message in bytes, then read those bytes
+;;     (when (listen stream)
+;;       (userial:with-buffer buffer
+;; 	(let* ((size (read-byte stream)))
+;; 	  (userial:buffer-advance size)
+;; 	  (read-sequence buffer stream :end size))
 
 
-	(unless (zerop (userial:buffer-length))
-	  (userial:buffer-rewind)
-	  (deserialize buffer (userial:unserialize :opcodes)))))))
+;; 	(unless (zerop (userial:buffer-length))
+;; 	  (userial:buffer-rewind)
+;; 	  (deserialize buffer (userial:unserialize :opcodes)))))))
 
 (defgeneric deserialize (buffer thing)
   (:method (message (thing (eql :delta-update)))
@@ -53,6 +53,10 @@
 
 (defun network ()
   "Network loop"
+  
+  (when (server-p)
+	(accept-client))
+  
   (if (connected-p)
       (progn
 	
@@ -63,6 +67,6 @@
 	  )
 	)
 
-      ;; Nothing is connected, so wait for its connection
-      (when (server-p)
-	(accept-client))))
+      )
+  
+  )

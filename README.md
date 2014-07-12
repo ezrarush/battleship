@@ -41,7 +41,7 @@ Run the following from the SBCL shell.
 
 You may use slime with this SBCL image by uncommenting the two swank lines and executing the command "slime-connect" in emacs.
 
-###Client
+### Player One 
 
 Run the following in a second SBCL instance shell.
 
@@ -50,4 +50,15 @@ Run the following in a second SBCL instance shell.
 (sdl2:make-this-thread-main (lambda () (battleship:main nil "127.0.0.1")))
 ```
 
-If the client is on a different host than the server, use the server's ip address instead of the loop back address "127.0.0.1".
+If the player one is on a different host than the server, use the server's ip address instead of the loop back address "127.0.0.1".
+
+### Player Two
+
+Run the following in a third SBCL instance shell.
+
+```lisp
+(ql:quickload "battleship")
+(sdl2:make-this-thread-main (lambda () (battleship:main nil "127.0.0.1")))
+```
+
+If the player two is on a different host than the server, use the server's ip address instead of the loop back address "127.0.0.1".
