@@ -14,8 +14,7 @@
 
 (defmethod ray-intersect ((self missile) v1 v2)
   (with-slots (pos radius) self
-    (let ((distance (ray-sphere-collision pos (* 2 radius) v1 v2)))
-      (when distance (sb-cga:vec+ v1 (sb-cga:vec* (sb-cga:vec- v1 v2) distance))))))
+    (ray-sphere-collision pos (* 2 radius) v1 v2)))
 
 (defun fire-missile (v1 v2 location)
   (let ((flag nil))

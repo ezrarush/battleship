@@ -1,6 +1,6 @@
 (in-package #:battleship)
 
-(defvar *placed-ships* '())
+(defvar *ships-placed* '())
 
 (defclass ship ()
   ((pos 
@@ -69,17 +69,17 @@
 		    (sb-cga:vec (+ -396.0 (/ (width new-ship) 2.0)) (+ -196.0 (/ (height new-ship) 2.0)) 0.0)
 		    (sb-cga:vec (- -4.0 (/ (width new-ship) 2.0)) (+ -196.0 (/ (height new-ship) 2.0)) 0.0)))))
     
-    (loop for placed-ship in *placed-ships* do
+    (loop for placed-ship in *ships-placed* do
        ;; clicking on an existing ship removes it
 	 (when (ray-intersect placed-ship v1 v2) 
 	   (setf flag nil)
 	   (remove-ship placed-ship))
        ;; stop placement if the new ship is placed over an existing ship 
 	 (when (collision-p new-ship placed-ship) (setf flag nil)))
-    (when flag (push new-ship *placed-ships*))))
+    (when flag (push new-ship *ships-placed*))))
 
 (defun remove-ship (ship)
-  (setf *placed-ships* (remove ship *placed-ships*)))
+  (setf *ships-placed* (remove ship *ships-placed*)))
 
 ;; check if ships collide
 (defun collision-p (first-ship second-ship)

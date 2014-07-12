@@ -1,5 +1,5 @@
-#WORK IN PROGRESS!
-This game is not complete.
+#WIP
+This project is not finished.
 
 #Description
 
@@ -7,10 +7,12 @@ A modern OpenGL networked battleship game meant to be a working implementation o
 
 #How to Play
 
-- Left click in your field to place ships 
-- Left click a ship to remove it
-- Right click a ship to rotate its orientation
-- Left click in the enemy's field to fire missiles
+- Left click on your field to place vertical ships 
+- Right click on your field to place horizontal ships
+- Click a ship to remove it
+- Left click on the enemy's field to fire missiles
+- Right click on the enemy's field to ping 
+   (hold down right click and drag to determine ping radius)
 
 #How to Run
 

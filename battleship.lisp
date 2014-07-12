@@ -47,7 +47,9 @@
 				 (multiple-value-bind (v1 v2)  (get-3d-ray-under-mouse (ensure-float x) (ensure-float (- *window-height* y)))
 				   (let ((location (enemy-field-ray-intersect v1 v2)))
 				     (if location 
-					 (fire-missile v1 v2 location)
+					 (if (eql button 1)
+					     (fire-missile v1 v2 location)
+					     (place-ping location))
 					 ;; if click wasn't on the enemy's field, check if it is on player's field 
 					 (let ((location (player-field-ray-intersect v1 v2)))
 					   (when location (place-ship v1 v2 location (if (eql button 1) :vertical :horizontal))))))))
