@@ -23,70 +23,87 @@
 
     (setf *server* server-p)
     (if (server-p)
-	(start-server server-ip port)
-	(connect-to-server server-ip port))
-    
-    (sdl2:with-window (win :title (if (server-p) "Battleship Server" "Battleship Client") :w *window-width* :h *window-height* :flags '(:shown :opengl))
-      (sdl2:with-gl-context (gl-context win)
-	(sdl2:gl-make-current win gl-context)
-	
-	(setf *graphics-engine* (make-instance 'graphics-engine))
-	(graphics-init *graphics-engine*)
-	(setf *last-time* (sdl2:get-ticks))
-	
-	(unwind-protect
-	     (sdl2:with-event-loop (:method :poll)
-	       (:keydown
-		(:keysym keysym)
-		(let ((scancode (sdl2:scancode-value keysym))
-		      (sym (sdl2:sym-value keysym))
-		      (mod-value (sdl2:mod-value keysym)))))
+	(progn
+	  (start-server server-ip port)
+	  (setf *last-time* (sdl2:get-ticks))       
+	  (unwind-protect
+	       (sdl2:with-event-loop (:method :poll)	     
+		 (:idle 
+		  ()
+		  (setf *current-time* (sdl2:get-ticks))
+		  (setf *delta-time* (ensure-float (- *current-time* *last-time*)))
+		  
+		  (when (>= *delta-time* 10.0)
+		    (incf *last-time* 10))
 
-	       (:mousebuttondown 
-		(:x x :y y :button button)
+		  (network)
+		  (when (connected-p)))
 
-		;; two vectors needed to trace a ray from mouse click into the 3D world
-		(multiple-value-bind (v1 v2)  (get-3d-ray-under-mouse (ensure-float x) (ensure-float (- *window-height* y)))
-		  (let ((location (enemy-field-ray-intersect v1 v2)))
-		    (if location 
-			;; right click for ping any other click fires a missile
-			(if (eql button 3)
-			    (make-ping location)
-			    (fire-missile v1 v2 location))
-			;; if click wasn't on the enemy's field, check if it is on player's field 
-			(let ((location (player-field-ray-intersect v1 v2)))
-			  (when location (place-ship v1 v2 location (if (eql button 1) :vertical :horizontal))))))))
+		 (:quit () t))
+	    
+	    (stop-server)))
+	(progn
+	  (connect-to-server server-ip port)
+	  (sdl2:with-window (win :title (if (server-p) "Battleship Server" "Battleship Client") :w *window-width* :h *window-height* :flags '(:shown :opengl))
+	    (sdl2:with-gl-context (gl-context win)
+	      (sdl2:gl-make-current win gl-context)
+	      
+	      (setf *graphics-engine* (make-instance 'graphics-engine))
+	      (graphics-init *graphics-engine*)
+	      
+	      (setf *last-time* (sdl2:get-ticks))	      
+	      (unwind-protect
+		   
+		   (sdl2:with-event-loop (:method :poll)
+		     
+		     (:keydown
+		      (:keysym keysym)
+		      (let ((scancode (sdl2:scancode-value keysym))
+			    (sym (sdl2:sym-value keysym))
+			    (mod-value (sdl2:mod-value keysym)))))
+		     
+		     (:mousebuttondown 
+		      (:x x :y y :button button)
+		      ;; two vectors needed to trace a ray from mouse click into the 3D world
+		      (multiple-value-bind (v1 v2)  (get-3d-ray-under-mouse (ensure-float x) (ensure-float (- *window-height* y)))
+			(let ((location (enemy-field-ray-intersect v1 v2)))
+			  (if location 
+			      ;; right click for ping any other click fires a missile
+			      (if (eql button 3)
+				  (make-ping location)
+				  (fire-missile v1 v2 location))
+			      ;; if click wasn't on the enemy's field, check if it is on player's field 
+			      (let ((location (player-field-ray-intersect v1 v2)))
+				(when location (place-ship v1 v2 location (if (eql button 1) :vertical :horizontal))))))))
 
-	       (:mousemotion 
-		(:x x :y y :state state)
-
-		;; ping radius is being determined until mousebuttonup button 3
-		(when (eql state 4)
-		  (multiple-value-bind (v1 v2)(get-3d-ray-under-mouse (ensure-float x) (ensure-float (- *window-height* y)))
-		    (let ((location (enemy-field-ray-intersect v1 v2))
-			  (pos (pos *ping*)))
-		      (when location
-			;; new radius is distance of mouse from pos
-			(setf (radius *ping*) (sqrt (+ (expt (- (aref location 0) (aref pos 0)) 2) (expt (- (aref location 1) (aref pos 1)) 2)) )))))))
-	       
-	       (:idle ()
+		     (:mousemotion 
+		      (:x x :y y :state state)
+		      ;; ping radius is being determined until right click release
+		      (when (eql state 4)
+			(multiple-value-bind (v1 v2)(get-3d-ray-under-mouse (ensure-float x) (ensure-float (- *window-height* y)))
+			  (let ((location (enemy-field-ray-intersect v1 v2))
+				(pos (pos *ping*)))
+			    (when location
+			      ;; new radius is distance of mouse from pos
+			      (setf (radius *ping*) (sqrt (+ (expt (- (aref location 0) (aref pos 0)) 2) (expt (- (aref location 1) (aref pos 1)) 2)) )))))))
+		     
+		     (:idle 
+		      ()
 		      (setf *current-time* (sdl2:get-ticks))
 		      (setf *delta-time* (ensure-float (- *current-time* *last-time*)))
 		      
 		      (when (>= *delta-time* 10.0)
-			
 			(incf *last-time* 10))
 
 		      (network)
+		      
 		      (when (connected-p)
-
 			(render-scene *graphics-engine*)
 			(sdl2:gl-swap-window win)))
 
-	       (:quit () t))
-	  (if (server-p)
-	      (stop-server)
-	      (disconnect-from-server)))))))
+		     (:quit () t))
+		
+		(disconnect-from-server))))))))
 
 (defun enemy-field-ray-intersect (v1 v2)
   (let ((distance (or (ray-triangle-collision v1 

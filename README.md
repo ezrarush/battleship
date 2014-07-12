@@ -1,9 +1,12 @@
 #WIP
 This project is not finished.
+For the time being ships will not be hidden for debugging purposes.
 
 #Description
 
-A modern OpenGL networked battleship game meant to be a working implementation of [userial's app example](https://github.com/nklein/userial#protocol) so that readers may better understand the protocol.
+A modern OpenGL networked realtime battleship game meant to be a working implementation of [userial's app example](https://github.com/nklein/userial#protocol) so that readers may better understand the protocol. 
+
+The only change to the protocol is that ships will be placed on a field of floats because of OpenGL.  
 
 #How to Play
 
@@ -11,8 +14,7 @@ A modern OpenGL networked battleship game meant to be a working implementation o
 - Right click on your field to place horizontal ships
 - Click a ship to remove it
 - Left click on the enemy's field to fire missiles
-- Right click on the enemy's field to ping 
-   (hold down right click and drag to determine ping radius)
+- Right click on the enemy's field to ping (hold down right click and drag to determine ping radius)
 
 #How to Run
 
