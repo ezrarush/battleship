@@ -38,7 +38,7 @@
    (camera
     :initarg :camera
     :initform (make-instance 'camera 
-			     :pos (sb-cga:vec 0.0 0.0 -10.0) 
+			     :pos (sb-cga:vec 0.0 0.0 -100.0) 
 			     :target (sb-cga:vec 0.0 0.0 0.0))
     :accessor camera)))
 

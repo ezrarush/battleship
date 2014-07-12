@@ -1,6 +1,6 @@
 (in-package #:battleship)
 
-(defvar *missiles-fired* '())
+(defparameter *missiles-fired* '())
 
 (defclass missile ()
   ((pos 
@@ -17,7 +17,8 @@
     (ray-sphere-collision pos (* 2 radius) v1 v2)))
 
 (defun fire-missile (v1 v2 location)
-  (let ((flag nil))
+  (let ((Location (sb-cga:vec+ location (sb-cga:vec 0.0 0.0 -2.0)))
+	(flag nil))
     (loop for missile in *missiles-fired* do
        ;; missile cannot be fire on top of another
 	 (when (ray-intersect missile v1 v2)

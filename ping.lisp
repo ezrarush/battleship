@@ -1,6 +1,6 @@
 (in-package #:battleship)
 
-(defvar *pings-placed* '())
+(defvar *ping* nil)
 
 (defclass ping ()
   ((pos 
@@ -9,13 +9,19 @@
     :accessor pos)
    (radius 
     :initarg :radius
-    :initform 6.0
+    :initform 1.0
     :accessor radius)))
 
 (defmethod ray-intersect ((self ping) v1 v2)
   (with-slots (pos radius) self
-    (let ((distance (ray-sphere-collision pos (* 2 radius) v1 v2)))
-      (when distance (sb-cga:vec+ v1 (sb-cga:vec* (sb-cga:vec- v1 v2) distance))))))
+    (ray-sphere-collision pos (* 2 radius) v1 v2)))
 
-(defun place-ping (location)
-  (push (make-instance 'ping :pos location) *pings-placed*))
+
+(defun make-ping (location)
+  (let ((location (sb-cga:vec+ location (sb-cga:vec 0.0 0.0 -1.0))))
+    (setf *ping* (make-instance 'ping :pos location))))
+
+;; (defun place-ping ()
+;;   (push *current-ping* *pings-placed*)
+;;   (setf *current-ping* nil))
+

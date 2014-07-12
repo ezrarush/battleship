@@ -5,7 +5,7 @@
 (declaim (optimize (debug 3) (speed 1) (safety 3)))
 
 (defparameter *window-width* 800)
-(defparameter *window-height* 400)
+(defparameter *window-height* 600)
 
 (defvar *last-time*)
 (defvar *current-time*)
@@ -42,18 +42,33 @@
 		      (sym (sdl2:sym-value keysym))
 		      (mod-value (sdl2:mod-value keysym)))))
 
-	       (:mousebuttondown (:x x :y y :button button)
-				 ;; two vectors needed to trace a ray from mouse click into the 3D world
-				 (multiple-value-bind (v1 v2)  (get-3d-ray-under-mouse (ensure-float x) (ensure-float (- *window-height* y)))
-				   (let ((location (enemy-field-ray-intersect v1 v2)))
-				     (if location 
-					 (if (eql button 1)
-					     (fire-missile v1 v2 location)
-					     (place-ping location))
-					 ;; if click wasn't on the enemy's field, check if it is on player's field 
-					 (let ((location (player-field-ray-intersect v1 v2)))
-					   (when location (place-ship v1 v2 location (if (eql button 1) :vertical :horizontal))))))))
+	       (:mousebuttondown 
+		(:x x :y y :button button)
 
+		;; two vectors needed to trace a ray from mouse click into the 3D world
+		(multiple-value-bind (v1 v2)  (get-3d-ray-under-mouse (ensure-float x) (ensure-float (- *window-height* y)))
+		  (let ((location (enemy-field-ray-intersect v1 v2)))
+		    (if location 
+			;; right click for ping any other click fires a missile
+			(if (eql button 3)
+			    (make-ping location)
+			    (fire-missile v1 v2 location))
+			;; if click wasn't on the enemy's field, check if it is on player's field 
+			(let ((location (player-field-ray-intersect v1 v2)))
+			  (when location (place-ship v1 v2 location (if (eql button 1) :vertical :horizontal))))))))
+
+	       (:mousemotion 
+		(:x x :y y :state state)
+
+		;; ping radius is being determined until mousebuttonup button 3
+		(when (eql state 4)
+		  (multiple-value-bind (v1 v2)(get-3d-ray-under-mouse (ensure-float x) (ensure-float (- *window-height* y)))
+		    (let ((location (enemy-field-ray-intersect v1 v2))
+			  (pos (pos *ping*)))
+		      (when location
+			;; new radius is distance of mouse from pos
+			(setf (radius *ping*) (sqrt (+ (expt (- (aref location 0) (aref pos 0)) 2) (expt (- (aref location 1) (aref pos 1)) 2)) )))))))
+	       
 	       (:idle ()
 		      (setf *current-time* (sdl2:get-ticks))
 		      (setf *delta-time* (ensure-float (- *current-time* *last-time*)))
@@ -76,14 +91,14 @@
 (defun enemy-field-ray-intersect (v1 v2)
   (let ((distance (or (ray-triangle-collision v1 
 					      (sb-cga:vec- v1 v2) 
-					      (sb-cga:vec   4.0  196.0 0.0)
-					      (sb-cga:vec   4.0 -196.0 0.0)
-					      (sb-cga:vec 396.0  196.0 0.0))
+					      (sb-cga:vec   4.0  196.0 19.0)
+					      (sb-cga:vec   4.0 -196.0 19.0)
+					      (sb-cga:vec 396.0  196.0 19.0))
 		      (ray-triangle-collision v1 
 					      (sb-cga:vec- v1 v2)
-					      (sb-cga:vec   4.0   -196.0 0.0)
-					      (sb-cga:vec 396.0 -196.0 0.0)
-					      (sb-cga:vec 396.0  196.0 0.0)))))
+					      (sb-cga:vec   4.0 -196.0 19.0)
+					      (sb-cga:vec 396.0 -196.0 19.0)
+					      (sb-cga:vec 396.0  196.0 19.0)))))
     (when distance
       ;; calculate click location on field
       (sb-cga:vec+ v1 (sb-cga:vec* (sb-cga:vec- v1 v2) distance)))))
@@ -91,14 +106,14 @@
 (defun player-field-ray-intersect (v1 v2)
   (let ((distance (or (ray-triangle-collision v1 
 					      (sb-cga:vec- v1 v2) 
-					      (sb-cga:vec   -4.0  196.0 0.0)
-					      (sb-cga:vec -396.0  196.0 0.0)
-					      (sb-cga:vec -396.0 -196.0 0.0))
+					      (sb-cga:vec   -4.0  196.0 9.0)
+					      (sb-cga:vec -396.0  196.0 9.0)
+					      (sb-cga:vec -396.0 -196.0 9.0))
 		      (ray-triangle-collision v1 
 					      (sb-cga:vec- v1 v2)
-					      (sb-cga:vec   -4.0   196.0 0.0)
-					      (sb-cga:vec -396.0 -196.0 0.0)
-					      (sb-cga:vec   -4.0 -196.0 0.0)))))
+					      (sb-cga:vec   -4.0   196.0 9.0)
+					      (sb-cga:vec -396.0 -196.0 9.0)
+					      (sb-cga:vec   -4.0 -196.0 9.0)))))
     (when distance
       ;; calculate click location on field
       (sb-cga:vec+ v1 (sb-cga:vec* (sb-cga:vec- v1 v2) distance)))))

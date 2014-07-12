@@ -54,7 +54,8 @@
 
 (defun place-ship (v1 v2 location orientation)
   ;; check if new ship will be inside player field based on placement click
-  (let* ((new-ship (make-instance 'ship :pos location :orientation orientation))
+  (let* ((Location (sb-cga:vec+ location (sb-cga:vec 0.0 0.0 -1.0)))
+	 (new-ship (make-instance 'ship :pos location :orientation orientation))
 	 ;; place new-ship only if it is entirely inside player field
 	 (flag (or (ray-triangle-collision 
 		    v1 
