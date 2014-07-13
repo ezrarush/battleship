@@ -29,10 +29,14 @@
       (:shot-results (handle-shot-results-message message)))))
 
 (defun handle-welcome-message (message)
+  (format t "server started match")
+  (finish-output)
   (userial:with-buffer message
-    (userial:unserialize-let* (:game-state-from-welcome game-state)
-      ;; do anything with this game state here
-      )))
+
+    ;; (userial:unserialize-let* (:game-state-from-welcome game-state)
+    ;;   ;; do anything with this game state here
+    ;;   )
+    ))
 
 (defun make-login-message (name)
   (userial:with-buffer (userial:make-buffer)

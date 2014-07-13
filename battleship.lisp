@@ -94,6 +94,9 @@
 			(setf *delta-time* (ensure-float (- *current-time* *last-time*)))
 			(when (>= *delta-time* 10.0)
 			  (incf *last-time* 10))
+			
+			(read-message *server-connection*)
+			
 			(render-scene *graphics-engine*)
 			(sdl2:gl-swap-window win)		     
 			)

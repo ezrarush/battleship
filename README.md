@@ -6,7 +6,7 @@ Currently only two clients may :login to the server for a :medium sized match wi
 
 #Description
 
-A modern OpenGL networked realtime battleship game meant to be a working implementation of [userial's app example](https://github.com/nklein/userial#protocol) so that readers may better understand the protocol. 
+A modern OpenGL networked real time battleship game meant to be a working implementation of [userial's app example](https://github.com/nklein/userial#protocol) so that readers may better understand the protocol. 
 
 One change to the protocol is that ships will be placed on a field of floats because of OpenGL.  
 

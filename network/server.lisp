@@ -45,8 +45,12 @@
 			      (match-or-queue name))))
 
 (defun match-or-queue (name)
-  (when (eql *clients* 2)
-    (format t "match made~%")))
+  (push (make-instance 'player :name name :ships 5 :energy 10.0 :missiles 20 :opponent "put opponent's name here") *players*)
+  (when (eql (length *players*) 2)
+    (format t "2 players logged in: starting match.~%")
+    (finish-output)
+    (loop for client in *clients* do
+	 (send-message client (make-welcome-message 5 10.0 20 "put opponent's name here")))))
 
 (defun handle-place-ship-message (message)
    (let (x y orientation)
@@ -58,10 +62,9 @@
 		      :is-vertical (eql orientation
 					:vertical))))
 
-(defun make-welcome-message (squares ships energy missiles opponent)
+(defun make-welcome-message (ships energy missiles opponent)
   (userial:with-buffer (userial:make-buffer)
-    (userial:serialize* :server-opcode :welcome
-			:uint8 squares
+    (userial:serialize* :server-opcodes :welcome
 			:uint8 ships
 			:float32 energy
 			:uint16 missiles
