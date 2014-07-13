@@ -23,6 +23,8 @@
 				     (:file "server")
 				     (:file "client")))	       
 	       (:file "picking")
+	       (:file "db")
+	       (:file "player")
 	       (:file "ship")
 	       (:file "ping")
 	       (:file "missile")
