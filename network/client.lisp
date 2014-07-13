@@ -12,12 +12,38 @@
   (usocket:socket-close *server-connection*)
   (setf *server-connection* nil))
 
-(defun delta-update (thing)
-  (let ((buffer (userial:make-buffer)))
-    (userial:with-buffer buffer
-      (userial:serialize* :opcodes :delta-update
-			  :keyword (typecase thing
-				     (ball   :ball)
-				     (paddle :paddle))))
-    (serialize buffer thing)
-    (send-message *server-connection* buffer)))
+
+(userial:make-accessor-serializer (:game-state-from-welcome welcome-state (make-game-state))
+  :uint8   game-state-board-size
+  :uint8   game-state-ships
+  :float32 game-state-energy
+  :uint16  game-state-missiles
+  :string  game-state-opponent)
+
+(defun handle-message-from-server (message)
+  (userial:with-buffer message
+    (ecase (userial:unserialize :server-opcodes)
+      (:welcome      (handle-welcome-message message))
+      (:ack          (handle-ack-message message))
+      (:sunk         (handle-sunk-message message))
+      (:shot-results (handle-shot-results-message message)))))
+
+(defun handle-welcome-message (message)
+  (userial:with-buffer message
+    (userial:unserialize-let* (:game-state-from-welcome game-state)
+      ;; do anything with this game state here
+      )))
+
+(defun make-login-message (name)
+  (userial:with-buffer (userial:make-buffer)
+    (userial:serialize* :client-opcodes      :login
+			:string               name)
+    (userial:get-buffer)))
+
+(defun make-place-ship-message (x y orientation)
+  (userial:with-buffer (userial:make-buffer)
+    (userial:serialize* :client-opcode :place-ship
+			:int8 x
+			:int8 y
+			:orientation orientation)))
+

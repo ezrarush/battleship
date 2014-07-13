@@ -1,14 +1,35 @@
 (in-package #:battleship)
 
-(userial:make-enum-serializer :opcodes
-    (:delta-update
-     :batch-update))
+(userial:make-enum-serializer :client-opcodes
+                      (:login :place-ship :ping :fire))
 
-(userial:make-vector-serializer :coordinate :int32 2)
+(userial:make-enum-serializer :server-opcodes
+                      (:welcome :ack :sunk :shot-results))
+
+(userial:make-bitfield-serializer :playable-board-sizes
+                          (:small :medium :large :huge))
+
+(userial:make-enum-serializer :orientation 
+		      (:horizontal :vertical))
 
 (defun connected-p ()
   (or *clients*
       *server-connection*))
+
+;; (defun read-message (from)
+;;   (let ((stream (usocket:socket-stream from))
+;; 	(message (userial:make-buffer)))
+;;     (when (listen stream)
+;;       (userial:with-buffer message
+;; 	(read-sequence message stream)
+;; 	(if (server-p)
+;; 	    (handle-message-from-client message)
+;; 	    (handle-message-from-server message))))))
+
+;; (defun send-message (to message)
+;;   (let ((stream (usocket:socket-stream to)))
+;;     (write-sequence message stream)
+;;     (force-output stream)))
 
 (defun send-message (to buffer)
   (userial:with-buffer buffer
@@ -18,55 +39,19 @@
       (write-sequence buffer stream :end (length buffer))
       (force-output stream))))
 
-;; (defun read-messages ()
-;;   (let* ((connection (if (server-p)
-;; 			 *client*
-;; 			 *server-connection*))
-;; 	 (buffer     (userial:make-buffer))
-;; 	 (stream     (usocket:socket-stream connection)))
+(defun read-message (connection)
+  (let* ((buffer (userial:make-buffer))
+	 (stream (usocket:socket-stream connection)))
 
-;;     ;; Read the size of the message in bytes, then read those bytes
-;;     (when (listen stream)
-;;       (userial:with-buffer buffer
-;; 	(let* ((size (read-byte stream)))
-;; 	  (userial:buffer-advance size)
-;; 	  (read-sequence buffer stream :end size))
+    ;; Read the size of the message in bytes, then read those bytes
+    (when (listen stream)
+      (userial:with-buffer buffer
+	(let* ((size (read-byte stream)))
+	  (userial:buffer-advance size)
+	  (read-sequence buffer stream :end size))
 
-
-;; 	(unless (zerop (userial:buffer-length))
-;; 	  (userial:buffer-rewind)
-;; 	  (deserialize buffer (userial:unserialize :opcodes)))))))
-
-(defgeneric deserialize (buffer thing)
-  (:method (message (thing (eql :delta-update)))
-    (userial:with-buffer message
-      (deserialize message (userial:unserialize :keyword))))
-
-  (:method (message (thing (eql :batch-update)))
-    (userial:with-buffer message
-      (let ((number-of-deltas (userial:unserialize :int32)))
-	(dotimes (i number-of-deltas)
-	  (deserialize message :delta-update))))))
-
-(defgeneric serialize (buffer thing))
-
-
-(defun network ()
-  "Network loop"
-  
-  (when (server-p)
-	(accept-client))
-  
-  (if (connected-p)
-      (progn
-	
-	;; (read-messages)
-
-	(when (server-p)
-	  ;; (batch-update)
-	  )
-	)
-
-      )
-  
-  )
+	(unless (zerop (userial:buffer-length))
+	  (userial:buffer-rewind)
+	  (if (server-p)
+	      (handle-message-from-client buffer)
+	      (handle-message-from-server buffer)))))))
