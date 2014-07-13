@@ -36,8 +36,9 @@
 		  (when (>= *delta-time* 10.0)
 		    (incf *last-time* 10))
 		 
-		  ;; network loop
-		  (accept-client)
+		  ;; Currently only two clients may :login to the server
+		  (when (< (length *clients*) 2)
+		    (accept-client))
 
 		  (loop for client in *clients* do
 		       (read-message client)))
@@ -48,7 +49,7 @@
 	  (connect-to-server server-ip port)
 	  (when (connected-p)
 	    (send-message *server-connection* (make-login-message name))
-	    (sdl2:with-window (win :title (if (server-p) "Battleship Server" "Battleship Client") :w *window-width* :h *window-height* :flags '(:shown :opengl))
+	    (sdl2:with-window (win :title (if (server-p) "Battleship Server" (concatenate 'string "Battleship Client: " name) ) :w *window-width* :h *window-height* :flags '(:shown :opengl))
 	      (sdl2:with-gl-context (gl-context win)
 		(sdl2:gl-make-current win gl-context)
 		(setf *graphics-engine* (make-instance 'graphics-engine))

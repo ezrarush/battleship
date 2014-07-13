@@ -1,6 +1,9 @@
 #WIP
 This project is not finished.
 
+Currently only two clients may :login to the server for a :medium sized match with no :opponent option
+
+
 #Description
 
 A modern OpenGL networked realtime battleship game meant to be a working implementation of [userial's app example](https://github.com/nklein/userial#protocol) so that readers may better understand the protocol. 
@@ -57,7 +60,7 @@ Run the following in a third SBCL instance shell.
 
 ```lisp
 (ql:quickload "battleship")
-(sdl2:make-this-thread-main (lambda () (battleship:main :server-p nil :server-ip "127.0.0.1" :name "Ranma Saotome")))
+(sdl2:make-this-thread-main (lambda () (battleship:main :server-p nil :server-ip "127.0.0.1" :name "Akane Tendo")))
 ```
 
 If player two is on a different host than the server, use the server's ip address instead of the loop back address "127.0.0.1".

@@ -29,6 +29,7 @@
     (push (usocket:socket-accept *server-socket*) *clients*)))
 
 (defun handle-message-from-client (message)
+  (finish-output)
   (userial:with-buffer message
     (ecase (userial:unserialize :client-opcodes)
       (:login      (handle-login-message message))
@@ -40,10 +41,12 @@
   (userial:with-buffer message
     (userial:unserialize-let* (:string name)
 			      (assert (plusp (length name)))
+			      (format t "~a has joined the server~%" name)
 			      (match-or-queue name))))
 
 (defun match-or-queue (name)
-  (format t "~a has joined the server~%" name))
+  (when (eql *clients* 2)
+    (format t "match made~%")))
 
 (defun handle-place-ship-message (message)
    (let (x y orientation)
