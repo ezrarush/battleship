@@ -1,12 +1,11 @@
 #WIP
 This project is not finished.
-For the time being ships will not be hidden for debugging purposes.
 
 #Description
 
 A modern OpenGL networked realtime battleship game meant to be a working implementation of [userial's app example](https://github.com/nklein/userial#protocol) so that readers may better understand the protocol. 
 
-The only change to the protocol is that ships will be placed on a field of floats because of OpenGL.  
+One change to the protocol is that ships will be placed on a field of floats because of OpenGL.  
 
 #How to Play
 
@@ -47,10 +46,10 @@ Run the following in a second SBCL instance shell.
 
 ```lisp
 (ql:quickload "battleship")
-(sdl2:make-this-thread-main (lambda () (battleship:main nil "127.0.0.1")))
+(sdl2:make-this-thread-main (lambda () (battleship:main :server-p nil :server-ip "127.0.0.1" :name "Ranma Saotome")))
 ```
 
-If the player one is on a different host than the server, use the server's ip address instead of the loop back address "127.0.0.1".
+If player one is on a different host than the server, use the server's ip address instead of the loop back address "127.0.0.1".
 
 ### Player Two
 
@@ -58,7 +57,7 @@ Run the following in a third SBCL instance shell.
 
 ```lisp
 (ql:quickload "battleship")
-(sdl2:make-this-thread-main (lambda () (battleship:main nil "127.0.0.1")))
+(sdl2:make-this-thread-main (lambda () (battleship:main :server-p nil :server-ip "127.0.0.1" :name "Ranma Saotome")))
 ```
 
-If the player two is on a different host than the server, use the server's ip address instead of the loop back address "127.0.0.1".
+If player two is on a different host than the server, use the server's ip address instead of the loop back address "127.0.0.1".

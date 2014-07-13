@@ -13,7 +13,7 @@
 
 (defvar *graphics-engine*)
 
-(defun main (&optional (server-p t) (server-ip usocket:*wildcard-host*) (port 2448))
+(defun main (&key (server-p t) (server-ip usocket:*wildcard-host*) (port 2448) (name "Unnamed"))
   (sdl2:with-init (:everything)
     (format t "Using SDL Library Version: ~D.~D.~D~%"
             sdl2-ffi:+sdl-major-version+
@@ -47,7 +47,7 @@
 	(progn
 	  (connect-to-server server-ip port)
 	  (when (connected-p)
-	    (send-message *server-connection* (make-login-message "player1"))
+	    (send-message *server-connection* (make-login-message name))
 	    (sdl2:with-window (win :title (if (server-p) "Battleship Server" "Battleship Client") :w *window-width* :h *window-height* :flags '(:shown :opengl))
 	      (sdl2:with-gl-context (gl-context win)
 		(sdl2:gl-make-current win gl-context)
