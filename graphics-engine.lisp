@@ -123,7 +123,7 @@
        (quad-render quad (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.0 0.2 0.0))
 
        (loop 
-	  for ship in *ships-placed* do
+	  for ship in *ships-placed*
 	  for i from -386.0 by 24.0 do
 	  
 	    
