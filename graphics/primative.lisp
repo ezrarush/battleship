@@ -75,7 +75,11 @@
    (technique)
    (vertex-count
     :initarg :vertex-count
-    :initform 64)))
+    :initform 64)
+   (contour
+    :initarg :contour
+    :initform nil
+    :accessor contour)))
 
 (defgeneric circle-render (circle projection-transform model-view-transform color))
 
@@ -110,7 +114,7 @@
     (setf technique (make-instance 'color-technique :vs-path "/home/quicklisp/local-projects/battleship/shaders/shader.vertexshader" :fs-path "/home/quicklisp/local-projects/battleship/shaders/shader.fragmentshader"))))
 
 (defmethod circle-render ((self circle) projection-transform model-view-transform color)
-    (with-slots (vertex-buffer technique vertex-count) self
+    (with-slots (vertex-buffer technique vertex-count contour) self
 
     (technique-enable technique)
 
@@ -128,7 +132,9 @@
     (gl:vertex-attrib-pointer 1 2 :float nil (* (cffi:foreign-type-size :float) 8) (cffi:make-pointer (* (cffi:foreign-type-size :float) 3)))
     (gl:vertex-attrib-pointer 2 3 :float nil (* (cffi:foreign-type-size :float) 8) (cffi:make-pointer (* (cffi:foreign-type-size :float) 5)))
     
-    (gl:draw-arrays :triangle-fan 0 vertex-count)
+    (if contour
+	(gl:draw-arrays :line-loop 1 (- vertex-count 1))
+	(gl:draw-arrays :triangle-fan 0 vertex-count))
       
     (gl:disable-vertex-attrib-array 0)
     (gl:disable-vertex-attrib-array 1)
