@@ -1,14 +1,18 @@
 #WIP
 This project is not finished.
 
-Currently only two clients may :login to the server for a :medium sized match with no :opponent option
-
-
 #Description
 
-A modern OpenGL networked real time battleship game meant to be a working implementation of [userial's app example](https://github.com/nklein/userial#protocol) so that readers may better understand the protocol. 
+A modern OpenGL networked real time battleship game meant to be a working example of [userial's game protocol](https://github.com/nklein/userial#protocol).  
 
-One change to the protocol is that ships will be placed on a field of floats because of OpenGL.  
+Changes made to the protocol:
+
+- Only two clients may login to the server so the opponent parts have been removed from the login and welcome messages.
+- Only one board size implemented (i.e. :medium).
+- Ships will be placed on a field of floats and not integers because OpenGL uses floats.
+- Typographical errors corrected to keep naming consistent throughout the code (e.g. :client-opcodes and :server-opcodes changed to :client-opcode and :server-opcode respectively)
+
+These changes may be reverted in a future update.
 
 #How to Play
 

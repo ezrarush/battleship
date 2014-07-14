@@ -22,7 +22,7 @@
 
 (defun handle-message-from-server (message)
   (userial:with-buffer message
-    (ecase (userial:unserialize :server-opcodes)
+    (ecase (userial:unserialize :server-opcode)
       (:welcome      (handle-welcome-message message))
       (:ack          (handle-ack-message message))
       (:sunk         (handle-sunk-message message))
@@ -39,14 +39,14 @@
 
 (defun make-login-message (name)
   (userial:with-buffer (userial:make-buffer)
-    (userial:serialize* :client-opcodes      :login
+    (userial:serialize* :client-opcode      :login
 			:string               name)
     (userial:get-buffer)))
 
 (defun make-place-ship-message (x y orientation)
   (userial:with-buffer (userial:make-buffer)
     (userial:serialize* :client-opcode :place-ship
-			:int8 x
-			:int8 y
+			:float32 x
+			:float32 y
 			:orientation orientation)))
 

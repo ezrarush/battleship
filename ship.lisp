@@ -19,7 +19,12 @@
    (height
     :initarg :height
     :initform 48.0
-    :accessor height)))
+    :accessor height)
+   ;; (owner
+   ;;  :initarg :owner
+   ;;  :initform (error ":owner required")
+   ;;  :accessor ship-owner)
+   ))
 
 (defgeneric click-location (ship v1 v2))
 
@@ -53,9 +58,8 @@
 	(sb-cga:vec+ v1 (sb-cga:vec* (sb-cga:vec- v1 v2) distance))))))
 
 (defun place-ship (v1 v2 location orientation)
-  ;; check if new ship will be inside player field based on placement click
-  (let* ((Location (sb-cga:vec+ location (sb-cga:vec 0.0 0.0 -1.0)))
-	 (new-ship (make-instance 'ship :pos location :orientation orientation))
+  (let* (;; place ship one unit closer in depth so that it is displayed above player field
+	 (new-ship (make-instance 'ship :pos (sb-cga:vec+ location (sb-cga:vec 0.0 0.0 -1.0)) :orientation orientation))
 	 ;; place new-ship only if it is entirely inside player field
 	 (flag (or (ray-triangle-collision 
 		    v1 
@@ -77,7 +81,9 @@
 	   (remove-ship placed-ship))
        ;; stop placement if the new ship is placed over an existing ship 
 	 (when (collision-p new-ship placed-ship) (setf flag nil)))
-    (when flag (push new-ship *ships-placed*))))
+    (when flag 
+      (push new-ship *ships-placed*)
+      (send-message *server-connection* (make-place-ship-message (aref location 0) (aref location 1) orientation)))))
 
 (defun remove-ship (ship)
   (setf *ships-placed* (remove ship *ships-placed*)))

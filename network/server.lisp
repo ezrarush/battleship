@@ -31,7 +31,7 @@
 (defun handle-message-from-client (message)
   (finish-output)
   (userial:with-buffer message
-    (ecase (userial:unserialize :client-opcodes)
+    (ecase (userial:unserialize :client-opcode)
       (:login      (handle-login-message message))
       (:place-ship (handle-place-ship-message message))
       (:ping       (handle-ping-message message))
@@ -52,21 +52,22 @@
     (loop for client in *clients* do
 	 (send-message client (make-welcome-message 40 5 10.0 20 "XXX")))))
 
-(defun handle-place-ship-message (message)
-   (let (x y orientation)
-     (userial:with-buffer message
-       (userial:unserialize* :int8        x
-			     :int8        y
-			     :orientation orientation))
-     (add-ship-to-map x y
-		      :is-vertical (eql orientation
-					:vertical))))
-
 (defun make-welcome-message (squares ships energy missiles opponent)
   (userial:with-buffer (userial:make-buffer)
-    (userial:serialize* :server-opcodes :welcome
+    (userial:serialize* :server-opcode :welcome
 			:uint8 squares
 			:uint8 ships
 			:float32 energy
 			:uint16 missiles
 			:string opponent)))
+
+(defun handle-place-ship-message (message)
+   (let (x y orientation)
+     (userial:with-buffer message
+       (userial:unserialize* :float32        x
+			     :float32        y
+			     :orientation orientation))
+     ;; (add-ship-to-map x y
+     ;; 		      :is-vertical (eql orientation
+     ;; 					:vertical))
+     ))

@@ -1,9 +1,9 @@
 (in-package #:battleship)
 
-(userial:make-enum-serializer :client-opcodes
+(userial:make-enum-serializer :client-opcode
                       (:login :place-ship :ping :fire))
 
-(userial:make-enum-serializer :server-opcodes
+(userial:make-enum-serializer :server-opcode
                       (:welcome :ack :sunk :shot-results))
 
 (userial:make-bitfield-serializer :playable-board-sizes
