@@ -11,6 +11,7 @@
 	       #:usocket
                #:userial)
   :components ((:file "package")
+	       (:file "game-state")
 	       (:module "graphics"
 			:components ((:file "utils")
 				     (:file "camera")

@@ -57,6 +57,7 @@
 		(setf *last-time* (sdl2:get-ticks))	      
 		(unwind-protect
 		     (sdl2:with-event-loop (:method :poll)
+		       
 		       (:keydown
 			(:keysym keysym)
 			(let ((scancode (sdl2:scancode-value keysym))
@@ -65,28 +66,42 @@
 		       
 		       (:mousebuttondown 
 			(:x x :y y :button button)
-			;; two vectors needed to trace a ray from mouse click into the 3D world
-			(multiple-value-bind (v1 v2)  (get-3d-ray-under-mouse (ensure-float x) (ensure-float (- *window-height* y)))
-			  (let ((location (enemy-field-ray-intersect v1 v2)))
-			    (if location 
-				;; right click for ping any other click fires a missile
-				(if (eql button 3)
-				    (make-ping location)
-				    (fire-missile v1 v2 location))
-				;; if click wasn't on the enemy's field, check if it is on player's field 
-				(let ((location (player-field-ray-intersect v1 v2)))
-				  (when location (place-ship v1 v2 location (if (eql button 1) :vertical :horizontal))))))))
+			(ecase (game-state-current-screen *game-state*)
+			  (:waiting-for-opponent)
+			  
+			  (:place-ships
+			   (multiple-value-bind (v1 v2)  (get-3d-ray-under-mouse (ensure-float x) (ensure-float (- *window-height* y)))
+			     (let ((location (player-field-ray-intersect v1 v2)))
+			       (when location 
+				 (place-ship v1 v2 location (if (eql button 1) :vertical :horizontal))))))
+			  
+			  (:game-play
+			   (multiple-value-bind (v1 v2)  (get-3d-ray-under-mouse (ensure-float x) (ensure-float (- *window-height* y)))
+			     (let ((location (enemy-field-ray-intersect v1 v2)))
+			       (when location 
+				   ;; right click for ping any other click fires a missile
+				   (if (eql button 3)
+				       (make-ping location)
+				       (fire-missile v1 v2 location))))))
+			  (:end-score)))
 
 		       (:mousemotion 
 			(:x x :y y :state state)
-			;; ping radius is being determined until right click release
-			(when (eql state 4)
-			  (multiple-value-bind (v1 v2)(get-3d-ray-under-mouse (ensure-float x) (ensure-float (- *window-height* y)))
-			    (let ((location (enemy-field-ray-intersect v1 v2))
-				  (pos (pos *ping*)))
-			      (when location
-				;; new radius is distance of mouse from pos
-				(setf (radius *ping*) (sqrt (+ (expt (- (aref location 0) (aref pos 0)) 2) (expt (- (aref location 1) (aref pos 1)) 2)) )))))))
+			(ecase (game-state-current-screen *game-state*)
+			  (:waiting-for-opponent)
+			  
+			  (:place-ships)
+			  
+			  (:game-play
+			   ;; ping radius is being determined until right click release
+			   (when (eql state 4)
+			     (multiple-value-bind (v1 v2)(get-3d-ray-under-mouse (ensure-float x) (ensure-float (- *window-height* y)))
+			       (let ((location (enemy-field-ray-intersect v1 v2))
+				     (pos (pos *ping*)))
+				 (when location
+				   ;; new radius is distance of mouse from pos
+				   (setf (radius *ping*) (sqrt (+ (expt (- (aref location 0) (aref pos 0)) 2) (expt (- (aref location 1) (aref pos 1)) 2)) )))))))
+			  (:end-score)))
 		       
 		       (:idle 
 			()
