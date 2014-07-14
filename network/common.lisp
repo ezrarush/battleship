@@ -13,23 +13,8 @@
 		      (:horizontal :vertical))
 
 (defun connected-p ()
-  (or *clients*
+  (or *players*
       *server-connection*))
-
-;; (defun read-message (from)
-;;   (let ((stream (usocket:socket-stream from))
-;; 	(message (userial:make-buffer)))
-;;     (when (listen stream)
-;;       (userial:with-buffer message
-;; 	(read-sequence message stream)
-;; 	(if (server-p)
-;; 	    (handle-message-from-client message)
-;; 	    (handle-message-from-server message))))))
-
-;; (defun send-message (to message)
-;;   (let ((stream (usocket:socket-stream to)))
-;;     (write-sequence message stream)
-;;     (force-output stream)))
 
 (defun send-message (to buffer)
   (userial:with-buffer buffer

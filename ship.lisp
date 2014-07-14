@@ -73,15 +73,15 @@
        ;; clicking on an existing ship removes it
 	 (when (ray-intersect placed-ship v1 v2) 
 	   (setf flag nil)
-	   
-	   ;; put this back went server can handle it
-	   ;; (remove-ship placed-ship)
-	   )
+	   (remove-ship placed-ship))
        ;; stop placement if the new ship is placed over an existing ship 
 	 (when (collision-p new-ship placed-ship) (setf flag nil)))
     (when (and flag (< (length *ships-placed*) (game-state-ships *game-state*))) 
       (push new-ship *ships-placed*)
-      (send-message *server-connection* (make-place-ship-message (aref location 0) (aref location 1) orientation)))))
+      (when (eql (length *ships-placed*) (game-state-ships *game-state*))
+	(loop for ship in *ships-placed* do
+	   (send-message *server-connection* (make-place-ship-message (aref (pos ship) 0) (aref (pos ship) 1) (orientation ship))))
+	(setf (game-state-current-screen *game-state*) :game-play)))))
 
 (defun remove-ship (ship)
   (setf *ships-placed* (remove ship *ships-placed*)))

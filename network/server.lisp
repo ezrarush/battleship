@@ -6,8 +6,6 @@
 
 (defun server-p () *server*)
 
-(defvar *clients* nil)
-
 (defun start-server (server-ip port)
   (assert (not *server-socket*))
   (setf *server-socket*
@@ -20,13 +18,13 @@
   (assert *server-socket*)
   (usocket:socket-close *server-socket*)
   (setf *server-socket* nil
-	*clients* nil))
+	*players* nil))
 
 (defun accept-client ()
   (when (usocket:wait-for-input *server-socket*
 				:timeout 0
 				:ready-only t)
-    (push (usocket:socket-accept *server-socket*) *clients*)))
+    (make-player (usocket:socket-accept *server-socket*))))
 
 (defun handle-message-from-client (message)
   (finish-output)
@@ -42,15 +40,24 @@
     (userial:unserialize-let* (:string name)
 			      (assert (plusp (length name)))
 			      (format t "~a has joined the server~%" name)
+			      (finish-output)
+			      (setf (name *current-player*) name)
 			      (match-or-queue name))))
 
 (defun match-or-queue (name)
-  (push (make-instance 'player :name name :ships 5 :energy 10.0 :missiles 20 :opponent "XXX") *players*)
+  ;; this whole function and *current-player* seems too hackish
+  (setf (ships *current-player*) 5)
+  (setf (energy *current-player*) 10.0)
+  (setf (missiles *current-player*) 20)
   (when (eql (length *players*) 2)
     (format t "2 players logged in: starting match.~%")
     (finish-output)
-    (loop for client in *clients* do
-	 (send-message client (make-welcome-message 40 5 10.0 20 "XXX")))))
+    
+    (setf (opponent (second *players*)) (name (first *players*)))
+    (setf (opponent (first *players*)) (name (second *players*)))
+
+    (send-message (socket-connection (second *players*)) (make-welcome-message 40 5 10.0 20 (opponent (second *players*))))
+    (send-message (socket-connection (first *players*)) (make-welcome-message 40 5 10.0 20 (opponent (first *players*))))))
 
 (defun make-welcome-message (squares ships energy missiles opponent)
   (userial:with-buffer (userial:make-buffer)
@@ -67,7 +74,12 @@
        (userial:unserialize* :float32        x
 			     :float32        y
 			     :orientation orientation))
-     ;; (add-ship-to-map x y
-     ;; 		      :is-vertical (eql orientation
-     ;; 					:vertical))
+     (add-ship-to-map x y :is-vertical (eql orientation :vertical))
      ))
+
+(defvar *client2-ship-list* '())
+(defvar *client1-ship-list* '())
+
+(defun add-ship-to-map (x y &key is-vertical)
+  (push (list x y is-vertical) (placed-ships *current-player*)))
+

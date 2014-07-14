@@ -13,6 +13,9 @@
 
 (defvar *graphics-engine*)
 
+;; a hack
+(defvar *current-player* nil)
+
 (defun main (&key (server-p t) (server-ip usocket:*wildcard-host*) (port 2448) (name "Unnamed"))
   (sdl2:with-init (:everything)
     (format t "Using SDL Library Version: ~D.~D.~D~%"
@@ -37,11 +40,15 @@
 		    (incf *last-time* 10))
 		 
 		  ;; Currently only two clients may :login to the server
-		  (when (< (length *clients*) 2)
+		  (when (< (length *players*) 2)
 		    (accept-client))
 
-		  (loop for client in *clients* do
-		       (read-message client)))
+		  (loop for player in *players* do
+		       
+		     ;; a hack to keep track of which player the message is from
+		       (setf *current-player* player)
+		       
+		       (read-message (socket-connection player))))
 		 
 		 (:quit () t))
 	    (stop-server)))
