@@ -75,7 +75,7 @@
    (technique)
    (vertex-count
     :initarg :vertex-count
-    :initform 32)))
+    :initform 64)))
 
 (defgeneric circle-render (circle projection-transform model-view-transform color))
 

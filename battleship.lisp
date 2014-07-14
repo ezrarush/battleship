@@ -13,7 +13,10 @@
 
 (defvar *graphics-engine*)
 
-;; a hack
+;; indicates that mouse button 3 is down to determine ping radius
+(defvar *right-click-toggle* nil)
+
+;; a hack to determine which player sent the message received by server
 (defvar *current-player* nil)
 
 (defun main (&key (server-p t) (server-ip usocket:*wildcard-host*) (port 2448) (name "Unnamed"))
@@ -38,17 +41,16 @@
 		  (setf *delta-time* (ensure-float (- *current-time* *last-time*)))
 		  (when (>= *delta-time* 10.0)
 		    (incf *last-time* 10))
-		 
+		  
 		  ;; Currently only two clients may :login to the server
 		  (when (< (length *players*) 2)
 		    (accept-client))
 
 		  (loop for player in *players* do
-		       
-		     ;; a hack to keep track of which player the message is from
 		       (setf *current-player* player)
-		       
-		       (read-message (socket-connection player))))
+		       (read-message (socket-connection player)))
+		  (setf *current-player* nil)
+		  )
 		 
 		 (:quit () t))
 	    (stop-server)))
@@ -69,39 +71,54 @@
 			(:keysym keysym)
 			(let ((scancode (sdl2:scancode-value keysym))
 			      (sym (sdl2:sym-value keysym))
-			      (mod-value (sdl2:mod-value keysym)))))
+			      (mod-value (sdl2:mod-value keysym))))
+			(ecase (game-state-current-screen *game-state*)
+			  (:waiting-for-opponent)
+			  (:place-ships)
+			  (:game-play)
+			  (:end-score))
+			)
 		       
 		       (:mousebuttondown 
 			(:x x :y y :button button)
 			(ecase (game-state-current-screen *game-state*)
 			  (:waiting-for-opponent)
-			  
 			  (:place-ships
 			   (multiple-value-bind (v1 v2)  (get-3d-ray-under-mouse (ensure-float x) (ensure-float (- *window-height* y)))
 			     (let ((location (player-field-ray-intersect v1 v2)))
 			       (when location 
 				 (place-ship v1 v2 location (if (eql button 1) :vertical :horizontal))))))
-			  
 			  (:game-play
 			   (multiple-value-bind (v1 v2)  (get-3d-ray-under-mouse (ensure-float x) (ensure-float (- *window-height* y)))
 			     (let ((location (enemy-field-ray-intersect v1 v2)))
 			       (when location 
-				   ;; right click for ping any other click fires a missile
-				   (if (eql button 3)
+				 ;; right click for ping any other click fires a missile
+				 (if (eql button 3)
+				     (progn
 				       (make-ping location)
-				       (fire-missile v1 v2 location))))))
+				       (setf *right-click-toggle* t))
+				     (fire-missile v1 v2 location))))))
 			  (:end-score)))
 
+		       (:mousebuttonup
+			()
+			(ecase (game-state-current-screen *game-state*)
+			  (:waiting-for-opponent)
+			  (:place-ships)
+			  (:game-play
+			   (if *right-click-toggle*
+;			       (send-message *server-connection* (make-ping-message (aref (pos *ping*) 0) (aref (pos *ping*) 1) (radius *ping*)))
+			       (setf *right-click-toggle* nil)))
+			  (:end-score)))
+		       
 		       (:mousemotion 
 			(:x x :y y :state state)
 			(ecase (game-state-current-screen *game-state*)
 			  (:waiting-for-opponent)
-			  
 			  (:place-ships)
-			  
 			  (:game-play
 			   ;; ping radius is being determined until right click release
-			   (when (eql state 4)
+			   (when *right-click-toggle*
 			     (multiple-value-bind (v1 v2)(get-3d-ray-under-mouse (ensure-float x) (ensure-float (- *window-height* y)))
 			       (let ((location (enemy-field-ray-intersect v1 v2))
 				     (pos (pos *ping*)))
