@@ -19,12 +19,7 @@
    (height
     :initarg :height
     :initform 48.0
-    :accessor height)
-   ;; (owner
-   ;;  :initarg :owner
-   ;;  :initform (error ":owner required")
-   ;;  :accessor ship-owner)
-   ))
+    :accessor height)))
 
 (defgeneric click-location (ship v1 v2))
 
@@ -81,7 +76,7 @@
 	   (remove-ship placed-ship))
        ;; stop placement if the new ship is placed over an existing ship 
 	 (when (collision-p new-ship placed-ship) (setf flag nil)))
-    (when flag 
+    (when (and flag (< (length *ships-placed*) (game-state-ships *game-state*))) 
       (push new-ship *ships-placed*)
       (send-message *server-connection* (make-place-ship-message (aref location 0) (aref location 1) orientation)))))
 

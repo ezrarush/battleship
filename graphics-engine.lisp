@@ -83,18 +83,68 @@
        (update-transforms pipeline)
        (quad-render quad (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.0 0.2 0.0))
 
-       (loop for ship in *ships-placed* do
+       (loop 
+	  for ship in *ships-placed* 
+	  for i from -386.0 by 24.0 do
+	    
+	  ;; ships on field
 	    (setf (scale pipeline) (sb-cga:vec (/ (width ship) 2.0) (/ (height ship) 2.0) 1.0))
 	    (setf (world-pos pipeline) (pos ship))
 	    (update-transforms pipeline)
-	    (quad-render quad (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.0 0.4 0.0)))
+	    (quad-render quad (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.0 0.4 0.0))
+	    
+	  ;; GUI scoreboard
+	    (setf (scale pipeline) (sb-cga:vec 10.0 5.0 1.0))
+	    (setf (world-pos pipeline) (sb-cga:vec (ensure-float i) 205.0 -2.0))
+	    (update-transforms pipeline)
+	    (quad-render quad (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.0 0.4 0.0))
+	    
+	    )
+
+       ;; enemy filed
+       (setf (world-pos pipeline) (sb-cga:vec 200.0 0.0 19.0))
+       (setf (scale pipeline) (sb-cga:vec 196.0 196.0 1.0))
+       (update-transforms pipeline)
+       (quad-render quad (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.0 0.2 0.0)))
+      
+      (:game-play
+
+       ;; GUI
+       ;; center bar
+       (setf (scale pipeline) (sb-cga:vec 4.0 200.0 1.0))
+       (setf (world-pos pipeline) (sb-cga:vec 0.0 0.0 0.0))
+       (update-transforms pipeline)
+       (quad-render quad (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.0 0.0 0.0))
+       
+       ;; player field
+       (setf (world-pos pipeline) (sb-cga:vec -200.0 0.0 9.0))
+       (setf (scale pipeline) (sb-cga:vec 196.0 196.0 1.0))
+       (update-transforms pipeline)
+       (quad-render quad (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.0 0.2 0.0))
+
+       (loop 
+	  for ship in *ships-placed* do
+	  for i from -386.0 by 24.0 do
+	  
+	    
+	    (setf (scale pipeline) (sb-cga:vec (/ (width ship) 2.0) (/ (height ship) 2.0) 1.0))
+	    (setf (world-pos pipeline) (pos ship))
+	    (update-transforms pipeline)
+	    (quad-render quad (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.0 0.4 0.0))
+	  
+	  ;; GUI scoreboard
+	    (setf (scale pipeline) (sb-cga:vec 10.0 5.0 1.0))
+	    (setf (world-pos pipeline) (sb-cga:vec (ensure-float i) 205.0 -2.0))
+	    (update-transforms pipeline)
+	    (quad-render quad (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.0 0.4 0.0))
+	    )
 
        ;; enemy filed
        (setf (world-pos pipeline) (sb-cga:vec 200.0 0.0 19.0))
        (setf (scale pipeline) (sb-cga:vec 196.0 196.0 1.0))
        (update-transforms pipeline)
        (quad-render quad (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.0 0.2 0.0))
-
+       
        (when *ping*
 	 (setf (scale pipeline) (sb-cga:vec (radius *ping*) (radius *ping*) 1.0))
 	 (setf (world-pos pipeline) (pos *ping*))
@@ -105,7 +155,8 @@
 	    (setf (scale pipeline) (sb-cga:vec (radius missile) (radius missile) 1.0))
 	    (setf (world-pos pipeline) (pos missile))
 	    (update-transforms pipeline)
-	    (circle-render circle (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.15 0.0 0.0))))
+	    (circle-render circle (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.15 0.0 0.0)))
+       )
       
       (:end-score))))
 
