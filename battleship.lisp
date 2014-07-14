@@ -106,9 +106,11 @@
 			  (:waiting-for-opponent)
 			  (:place-ships)
 			  (:game-play
-			   (if *right-click-toggle*
+			   (when *right-click-toggle*
+			       
 ;			       (send-message *server-connection* (make-ping-message (aref (pos *ping*) 0) (aref (pos *ping*) 1) (radius *ping*)))
-			       (setf *right-click-toggle* nil)))
+			       (setf *right-click-toggle* nil)
+			       (setf *ping* nil)))
 			  (:end-score)))
 		       
 		       (:mousemotion 
@@ -118,7 +120,7 @@
 			  (:place-ships)
 			  (:game-play
 			   ;; ping radius is being determined until right click release
-			   (when *right-click-toggle*
+			   (when (and *ping* *right-click-toggle*)
 			     (multiple-value-bind (v1 v2)(get-3d-ray-under-mouse (ensure-float x) (ensure-float (- *window-height* y)))
 			       (let ((location (enemy-field-ray-intersect v1 v2))
 				     (pos (pos *ping*)))
