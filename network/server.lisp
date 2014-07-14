@@ -83,3 +83,13 @@
 (defun add-ship-to-map (x y &key is-vertical)
   (push (list x y is-vertical) (placed-ships *current-player*)))
 
+
+(defun handle-ping-message (message)
+  (userial:with-buffer message
+  (apply #'calculate-ping-response
+         (userial:unserialize-list* '(:float32 :float32 :float32)))))
+
+(defun calculate-ping-response (radius x y)
+  (format t "ping message received from ~a~%" (name *current-player*))
+  (finish-output)
+  )

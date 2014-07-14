@@ -107,8 +107,7 @@
 			  (:place-ships)
 			  (:game-play
 			   (when *right-click-toggle*
-			       
-;			       (send-message *server-connection* (make-ping-message (aref (pos *ping*) 0) (aref (pos *ping*) 1) (radius *ping*)))
+			       (send-message *server-connection* (make-ping-message (aref (pos *ping*) 0) (aref (pos *ping*) 1) (radius *ping*)))
 			       (setf *right-click-toggle* nil)
 			       (setf *ping* nil)))
 			  (:end-score)))

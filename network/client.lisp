@@ -50,3 +50,9 @@
 			:float32 y
 			:orientation orientation)))
 
+(defun make-ping-message (x y radius)
+  (userial:with-buffer (userial:make-buffer)
+    (userial:serialize* :client-opcode :ping
+			:float32       radius
+			:float32       x
+			:float32       y)))
