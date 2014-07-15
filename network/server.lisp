@@ -33,7 +33,7 @@
       (:login      (handle-login-message message))
       (:place-ship (handle-place-ship-message message))
       (:ping       (handle-ping-message message))
-      (:fire       (handle-ping-message message)))))
+      (:fire       (handle-fire-message message)))))
 
 (defun handle-login-message (message)
   (userial:with-buffer message
@@ -84,17 +84,16 @@
 
 (defun handle-ping-message (message)
   (userial:with-buffer message
-  (apply #'calculate-ping-response
-         (userial:unserialize-list* '(:float32 :float32 :float32)))))
+    (apply #'calculate-ping-response
+	   (userial:unserialize-list* '(:float32 :float32 :float32)))))
 
 (defun calculate-ping-response (radius ping-x ping-y)
   (format t "ping message received from ~a~%" (name *current-player*))
   (finish-output)
   (let (;; this only works because *players* is always length 2
-	(opponent (remove *current-player* *players*))
+	(opponents (remove *current-player* *players*))
 	(hits '()))
-    ;; player pings her own ships for testing 
-    (loop for ship in (placed-ships (pop opponent)) do
+    (loop for ship in (placed-ships (pop opponents)) do
 	 (let ((d (distance ping-x ping-y (first ship) (second ship))))
 	   (when (< d radius)
 	     (push d hits))))
@@ -108,3 +107,40 @@
 			:uint16 (length hits))
     (mapcar #'(lambda (d) (userial:serialize :float32 d)) hits)
     (userial:get-buffer)))
+
+(defun handle-fire-message (message)
+  (userial:with-buffer message
+    (apply #'calculate-fire-response
+	   (userial:unserialize-list* '(:float32 :float32)))))
+
+(defun calculate-fire-response (missile-x missile-y)
+  (format t "fire message received from ~a~%" (name *current-player*))
+  (finish-output)
+  (let (;; this only works because *players* is always length 2
+	(opponents (remove *current-player* *players*))
+	(hit nil))
+    (loop for ship in (placed-ships (first opponents)) do
+	 (let ((ship-x (first ship))
+	       (ship-y (second ship))
+	       (half-width (if (third ship) 6.0 24.0))
+	       (half-height (if (third ship) 24.0 6.0))
+	       (missile-radius 2.0))
+	   (when (and (<= (- missile-x missile-radius) (+ ship-x half-width))
+		      (>= (+ missile-x missile-radius) (- ship-x half-width))
+		      (<= (- missile-y missile-radius) (+ ship-y half-height))
+		      (>= (+ missile-y missile-radius) (- ship-y half-height)))
+	     (setf hit t)
+	     (send-message (socket-connection (first opponents)) (make-sunk-message missile-x missile-y)))))
+    (send-message (socket-connection *current-player*) (make-shot-results-message hit))))
+
+(defun make-shot-results-message (hit)
+  (userial:with-buffer (userial:make-buffer)
+    (userial:serialize* :server-opcode :shot-results
+			:shot-result    (if hit :hit :miss))))
+
+(defun make-sunk-message (x y)
+  (userial:with-buffer (userial:make-buffer)
+    (userial:serialize* :server-opcode :sunk
+			:float32           x
+			:float32           y)))
+

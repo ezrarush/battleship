@@ -1,6 +1,7 @@
 (in-package #:battleship)
 
-(defparameter *missiles-fired* '())
+(defvar *missiles-fired* '())
+(defvar *current-missile* nil)
 
 (defclass missile ()
   ((pos 
@@ -9,18 +10,23 @@
     :accessor pos)
    (radius 
     :initarg :radius
-    :initform 6.0
-    :accessor radius)))
+    :initform 2.0
+    :accessor radius)
+   (hit-p
+    :initform nil
+    :accessor hit-p)))
 
 (defmethod ray-intersect ((self missile) v1 v2)
   (with-slots (pos radius) self
     (ray-sphere-collision pos (* 2 radius) v1 v2)))
 
 (defun fire-missile (v1 v2 location)
-  (let ((Location (sb-cga:vec+ location (sb-cga:vec 0.0 0.0 -2.0)))
+  (let ((location (sb-cga:vec+ location (sb-cga:vec 0.0 0.0 -3.0)))
 	(flag nil))
     (loop for missile in *missiles-fired* do
        ;; missile cannot be fire on top of another
 	 (when (ray-intersect missile v1 v2)
 	   (setf flag t)))
-    (unless flag (push (make-instance 'missile :pos location) *missiles-fired*))))
+    (unless flag 
+      (setf *current-missile* (make-instance 'missile :pos location))
+      (send-message *server-connection* (make-fire-message (aref location 0) (aref location 1))))))

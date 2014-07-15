@@ -19,7 +19,10 @@
    (height
     :initarg :height
     :initform 48.0
-    :accessor height)))
+    :accessor height)
+   (sunk-p
+    :initform nil
+    :accessor sunk-p)))
 
 (defgeneric click-location (ship v1 v2))
 

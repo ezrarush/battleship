@@ -12,6 +12,8 @@
 (userial:make-enum-serializer :orientation 
 		      (:horizontal :vertical))
 
+(userial:make-enum-serializer :shot-result (:hit :miss))
+
 (defun connected-p ()
   (or *players*
       *server-connection*))

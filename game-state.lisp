@@ -15,8 +15,7 @@
 		    :accessor game-state-current-screen)))
 
 ;; slots must be bound or (userial:unserialize :game-state-from-welcome :welcome-state *game-state*) will crash
-(defvar *game-state* (make-instance 'game-state :board-size 40 :ships 2 :energy 20.0 :missiles 11 :opponent "your-daddy"))
-
+(defvar *game-state* (make-instance 'game-state :board-size 40 :ships 5 :energy 10.0 :missiles 20 :opponent "your-daddy"))
 
 (defun make-game-state ()
   (make-instance 'game-state))
