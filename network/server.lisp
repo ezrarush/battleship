@@ -129,8 +129,8 @@
 		      (>= (+ missile-x missile-radius) (- ship-x half-width))
 		      (<= (- missile-y missile-radius) (+ ship-y half-height))
 		      (>= (+ missile-y missile-radius) (- ship-y half-height)))
-	     (setf hit t)
-	     (send-message (socket-connection (first opponents)) (make-sunk-message missile-x missile-y)))))
+	     (setf hit t))))
+    (send-message (socket-connection (first opponents)) (make-sunk-message missile-x missile-y))
     (send-message (socket-connection *current-player*) (make-shot-results-message hit))))
 
 (defun make-shot-results-message (hit)

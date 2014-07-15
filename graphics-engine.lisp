@@ -140,15 +140,24 @@
 	    (quad-render quad (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.0 0.4 0.0)))
        
        ;; sunk scoreboard overlaps gui scoreboard
-       (loop 
-       	  for ship in *ships-placed* 
-       	  for i from -386.0 by 24.0 when (sunk-p ship) do
-	    
-       	    (setf (scale pipeline) (sb-cga:vec 10.0 5.0 1.0))
-       	    (setf (world-pos pipeline) (sb-cga:vec (ensure-float i) 205.0 -2.0))
-       	    (update-transforms pipeline)
-       	    (quad-render quad (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.6 0.0 0.0)))
+       (let ((i -386.0))
+	 (loop for ship in *ships-placed* when (sunk-p ship) do
+	      (setf (scale pipeline) (sb-cga:vec 10.0 5.0 1.0))
+	      (setf (world-pos pipeline) (sb-cga:vec (ensure-float i) 205.0 -3.0))
+	      (update-transforms pipeline)
+	      (quad-render quad (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.6 0.0 0.0))
+	      (setf i (incf i 24.0))))
 
+       
+       (loop for missile in *enemy-fire* do
+	    (setf (scale pipeline) (sb-cga:vec (radius missile) (radius missile) 1.0))
+	    (setf (world-pos pipeline) (pos missile))
+	    (update-transforms pipeline)
+	    (if (hit-p missile)
+		(circle-render circle (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 1.0 0.0 0.0))
+		(circle-render circle (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.2 0.0 0.0))))
+       
+       
        ;; enemy filed
        (setf (world-pos pipeline) (sb-cga:vec 200.0 0.0 19.0))
        (setf (scale pipeline) (sb-cga:vec 196.0 196.0 1.0))

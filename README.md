@@ -10,6 +10,7 @@ Changes made to the protocol:
 - Only two clients may login to the server so the opponent parts have been removed from the login and welcome messages.
 - Only one board size implemented (i.e. :medium).
 - Ships will be placed on a field of floats and not integers because OpenGL uses floats.
+- Sunk message is sent to opponent regardless of hit so that enemy fire can be displayed.
 - Typographical errors corrected to keep naming consistent throughout the code (e.g. :client-opcodes and :server-opcodes changed to :client-opcode and :server-opcode respectively)
 
 These changes may be reverted in a future update.

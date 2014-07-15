@@ -2,6 +2,7 @@
 
 (defvar *missiles-fired* '())
 (defvar *current-missile* nil)
+(defvar *enemy-fire* '())
 
 (defclass missile ()
   ((pos 
@@ -13,6 +14,7 @@
     :initform 2.0
     :accessor radius)
    (hit-p
+    :initarg :hit-p
     :initform nil
     :accessor hit-p)))
 
