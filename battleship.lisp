@@ -50,8 +50,7 @@
 		  (loop for player in *players* do
 		       (setf *current-player* player)
 		       (read-message (socket-connection player)))
-		  (setf *current-player* nil)
-		  )
+		  (setf *current-player* nil))
 		 
 		 (:quit () t))
 	    (stop-server)))
@@ -88,8 +87,11 @@
 			  (:place-ships
 			   (multiple-value-bind (v1 v2)  (get-3d-ray-under-mouse (ensure-float x) (ensure-float (- *window-height* y)))
 			     (let ((location (player-field-ray-intersect v1 v2)))
-			       (when location 
-				 (place-ship v1 v2 location (if (eql button 1) :vertical :horizontal))))))
+			       (if location 
+				 (place-ship v1 v2 location (if (eql button 1) :vertical :horizontal))
+				 ;; if not player field than maybe ready button
+				 (when (ready-button-ray-intersect v1 v2)
+				   (ready-for-match))))))
 			  (:game-play
 			   (multiple-value-bind (v1 v2)  (get-3d-ray-under-mouse (ensure-float x) (ensure-float (- *window-height* y)))
 			     (let ((location (enemy-field-ray-intersect v1 v2)))
@@ -175,4 +177,14 @@
       ;; calculate click location on field
       (sb-cga:vec+ v1 (sb-cga:vec* (sb-cga:vec- v1 v2) distance)))))
 
-
+(defun ready-button-ray-intersect (v1 v2)
+  (or (ray-triangle-collision v1 
+			      (sb-cga:vec- v1 v2) 
+			      (sb-cga:vec 150.0  25.0 -1.0)
+			      (sb-cga:vec 150.0 -25.0 -1.0)
+			      (sb-cga:vec 250.0  25.0 -1.0))
+      (ray-triangle-collision v1 
+			      (sb-cga:vec- v1 v2)
+			      (sb-cga:vec 150.0 -25.0 -1.0)
+			      (sb-cga:vec 250.0 -25.0 -1.0)
+			      (sb-cga:vec 250.0  25.0 -1.0))))

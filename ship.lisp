@@ -80,11 +80,7 @@
        ;; stop placement if the new ship is placed over an existing ship 
 	 (when (collision-p new-ship placed-ship) (setf flag nil)))
     (when (and flag (< (length *ships-placed*) (game-state-ships *game-state*))) 
-      (push new-ship *ships-placed*)
-      (when (eql (length *ships-placed*) (game-state-ships *game-state*))
-	(loop for ship in *ships-placed* do
-	   (send-message *server-connection* (make-place-ship-message (aref (pos ship) 0) (aref (pos ship) 1) (orientation ship))))
-	(setf (game-state-current-screen *game-state*) :game-play)))))
+      (push new-ship *ships-placed*))))
 
 (defun remove-ship (ship)
   (setf *ships-placed* (remove ship *ships-placed*)))

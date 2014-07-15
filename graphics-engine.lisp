@@ -97,15 +97,13 @@
 	    (setf (scale pipeline) (sb-cga:vec 10.0 5.0 1.0))
 	    (setf (world-pos pipeline) (sb-cga:vec (ensure-float i) 205.0 -2.0))
 	    (update-transforms pipeline)
-	    (quad-render quad (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.0 0.4 0.0))
-	    
-	    )
+	    (quad-render quad (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.0 0.4 0.0)))
 
-       ;; enemy filed
+       ;; ready button will go on this quad
        (setf (world-pos pipeline) (sb-cga:vec 200.0 0.0 19.0))
-       (setf (scale pipeline) (sb-cga:vec 196.0 196.0 1.0))
+       (setf (scale pipeline) (sb-cga:vec 50.0 25.0 1.0))
        (update-transforms pipeline)
-       (quad-render quad (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.0 0.2 0.0)))
+       (quad-render quad (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.0 0.5 0.0)))
       
       (:game-play
 
