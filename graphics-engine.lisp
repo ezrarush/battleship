@@ -150,6 +150,14 @@
 	 (setf (world-pos pipeline) (pos *ping*))
 	 (update-transforms pipeline)	 
 	 (circle-render circle (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.0 0.3 0.0)))
+
+       (setf (contour circle) t)
+       (loop for hit in *ping-hits* do
+	    (setf (scale pipeline) (sb-cga:vec (second hit) (second hit) 1.0))
+	    (setf (world-pos pipeline) (first hit))
+	    (update-transforms pipeline)	 
+	    (circle-render circle (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.6 0.0 0.0)))
+       (setf (contour circle) nil)
        
        (loop for missile in *missiles-fired* do
 	    (setf (scale pipeline) (sb-cga:vec (radius missile) (radius missile) 1.0))

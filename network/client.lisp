@@ -56,3 +56,14 @@
 			:float32       radius
 			:float32       x
 			:float32       y)))
+
+(defun handle-ack-message (message)
+  (userial:with-buffer message
+    (let (remaining-energy hit-number)
+      (userial:unserialize* :float32 remaining-energy
+			    :uint16 hit-number)
+      (format t "Received ping ack message from server with ~a hits~%" hit-number)
+      (finish-output)
+      (loop repeat hit-number do
+	   ;; hit pos has less depth so that it is on top of ping
+	   (push (list (sb-cga:vec+ (pos *ping*) (sb-cga:vec 0.0 0.0 -1.0)) (userial:unserialize :float32)) *ping-hits*)))))

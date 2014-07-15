@@ -74,11 +74,9 @@
        (userial:unserialize* :float32        x
 			     :float32        y
 			     :orientation orientation))
-     (add-ship-to-map x y :is-vertical (eql orientation :vertical))
+     ;; move x from negative placement field to positive play field
+     (add-ship-to-map (+ x 400.0) y :is-vertical (eql orientation :vertical))
      ))
-
-(defvar *client2-ship-list* '())
-(defvar *client1-ship-list* '())
 
 (defun add-ship-to-map (x y &key is-vertical)
   (push (list x y is-vertical) (placed-ships *current-player*)))
@@ -89,7 +87,24 @@
   (apply #'calculate-ping-response
          (userial:unserialize-list* '(:float32 :float32 :float32)))))
 
-(defun calculate-ping-response (radius x y)
+(defun calculate-ping-response (radius ping-x ping-y)
   (format t "ping message received from ~a~%" (name *current-player*))
   (finish-output)
-  )
+  (let (;; this only works because *players* is always length 2
+	(opponent (remove *current-player* *players*))
+	(hits '()))
+    ;; player pings her own ships for testing 
+    (loop for ship in (placed-ships (pop opponent)) do
+	 (let ((d (distance ping-x ping-y (first ship) (second ship))))
+	   (when (< d radius)
+	     (push d hits))))
+    (setf (energy *current-player*) (- (energy *current-player*) 1))
+    (send-message (socket-connection *current-player*) (make-ack-message (energy *current-player*) hits))))
+
+(defun make-ack-message (remaining-ping-energy hits)
+  (userial:with-buffer (userial:make-buffer)
+    (userial:serialize* :server-opcode :ack
+			:float32 remaining-ping-energy
+			:uint16 (length hits))
+    (mapcar #'(lambda (d) (userial:serialize :float32 d)) hits)
+    (userial:get-buffer)))

@@ -61,3 +61,6 @@
 	      nil
 	      ;; distance to hit
 	      (* f (sb-cga:dot-product e2 r)))))))
+
+(defun distance (x1 y1 x2 y2)
+  (sqrt (+ (expt (- x1 x2) 2) (expt (- y1 y2) 2)) ))

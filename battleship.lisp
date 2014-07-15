@@ -29,6 +29,7 @@
 
     (setf *server* server-p)
     (if (server-p)
+	
 	(progn
 	  (start-server server-ip port)
 	  (setf *last-time* (sdl2:get-ticks))       
@@ -54,6 +55,7 @@
 		 
 		 (:quit () t))
 	    (stop-server)))
+
 	(progn
 	  (connect-to-server server-ip port)
 	  (when (connected-p)
@@ -108,8 +110,7 @@
 			  (:game-play
 			   (when *right-click-toggle*
 			       (send-message *server-connection* (make-ping-message (aref (pos *ping*) 0) (aref (pos *ping*) 1) (radius *ping*)))
-			       (setf *right-click-toggle* nil)
-			       (setf *ping* nil)))
+			       (setf *right-click-toggle* nil)))
 			  (:end-score)))
 		       
 		       (:mousemotion 
@@ -125,7 +126,7 @@
 				     (pos (pos *ping*)))
 				 (when location
 				   ;; new radius is distance of mouse from pos
-				   (setf (radius *ping*) (sqrt (+ (expt (- (aref location 0) (aref pos 0)) 2) (expt (- (aref location 1) (aref pos 1)) 2)) )))))))
+				   (setf (radius *ping*) (distance (aref location 0) (aref location 1) (aref pos 0) (aref pos 1))))))))
 			  (:end-score)))
 		       
 		       (:idle 
