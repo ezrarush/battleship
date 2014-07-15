@@ -4,7 +4,7 @@
                       (:login :place-ship :ping :fire))
 
 (userial:make-enum-serializer :server-opcode
-                      (:welcome :ack :sunk :shot-results))
+                      (:welcome :match-begin :ack :sunk :shot-results))
 
 (userial:make-bitfield-serializer :playable-board-sizes
                           (:small :medium :large :huge))

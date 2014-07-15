@@ -79,8 +79,17 @@
      ))
 
 (defun add-ship-to-map (x y &key is-vertical)
-  (push (list x y is-vertical) (placed-ships *current-player*)))
+  (push (list x y is-vertical) (placed-ships *current-player*))
+  (let ((flag nil))
+    (loop for player in *players* do
+	 (when (< (length (placed-ships player)) 5) (setf flag t)))
+    (unless flag 
+      (loop for player in *players* do
+	   (send-message (socket-connection player) (make-match-begin-message))))))
 
+(defun make-match-begin-message ()
+  (userial:with-buffer (userial:make-buffer)
+    (userial:serialize :server-opcode :match-begin)))
 
 (defun handle-ping-message (message)
   (userial:with-buffer message
