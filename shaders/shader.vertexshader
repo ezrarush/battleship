@@ -1,11 +1,9 @@
-#version 330
+#version 120
 
 uniform mat4 projectionMatrix;
 uniform mat4 modelViewMatrix;
 
-layout (location = 0) in vec3 inPosition;
-layout (location = 1) in vec2 TexCoord;                                             
-layout (location = 2) in vec3 Normal;
+attribute vec3 inPosition;
 
 void main()
 {

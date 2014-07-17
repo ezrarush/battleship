@@ -1,11 +1,9 @@
-#version 330
-
-out vec4 outputColor;
+#version 120
 
 uniform vec3 gColor;
 
 void main()
 {
-        outputColor = vec4(gColor, 1.0);
+        gl_FragColor = vec4(gColor, 1.0);
         
 }
