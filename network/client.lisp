@@ -52,10 +52,11 @@
 			:orientation orientation)))
 
 (defun ready-for-match ()
-  (when (eql (length *ships-placed*) (game-state-ships *game-state*))
-    (loop for ship in *ships-placed* do
-	 (setf (game-state-current-screen *game-state*) :waiting-for-opponent)
-	 (send-message *server-connection* (make-place-ship-message (aref (pos ship) 0) (aref (pos ship) 1) (orientation ship))))))
+  (loop repeat (- (game-state-ships *game-state*) (length *ships-placed*)) do
+       (place-random-ship))
+  (loop for ship in *ships-placed* do
+	 (send-message *server-connection* (make-place-ship-message (aref (pos ship) 0) (aref (pos ship) 1) (orientation ship))))
+  (setf (game-state-current-screen *game-state*) :waiting-for-opponent))
 
 (defun handle-match-begin ()
   (setf (game-state-current-screen *game-state*) :game-play))

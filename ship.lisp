@@ -55,7 +55,7 @@
 	;; calculate click location on ship
 	(sb-cga:vec+ v1 (sb-cga:vec* (sb-cga:vec- v1 v2) distance))))))
 
-(defun place-ship (v1 v2 location orientation)
+(defun place-ship (v1 v2 location orientation %key remove)
   (let* (;; place ship one unit closer in depth so that it is displayed above player field
 	 (new-ship (make-instance 'ship :pos (sb-cga:vec+ location (sb-cga:vec 0.0 0.0 -1.0)) :orientation orientation))
 	 ;; place new-ship only if it is entirely inside player field
@@ -76,11 +76,22 @@
        ;; clicking on an existing ship removes it
 	 (when (ray-intersect placed-ship v1 v2) 
 	   (setf flag nil)
-	   (remove-ship placed-ship))
+	   (when remove
+	     (remove-ship placed-ship)))
        ;; stop placement if the new ship is placed over an existing ship 
 	 (when (collision-p new-ship placed-ship) (setf flag nil)))
     (when (and flag (< (length *ships-placed*) (game-state-ships *game-state*))) 
-      (push new-ship *ships-placed*))))
+      (push new-ship *ships-placed*))
+    flag))
+
+(defun place-random-ship ()
+  (let ((x (+ 4 (random 392.0)))
+	(y (+ 104 (random 392.0)))
+	(vert (random 2)))
+    (multiple-value-bind (v1 v2) (get-3d-ray-under-mouse (ensure-float x) (ensure-float (- *window-height* y)))
+			     (let ((location (player-field-ray-intersect v1 v2)))
+			       (unless (and location (place-ship v1 v2 location (if (eql 0 vert) :vertical :horizontal) :remove nil))
+				 (place-random-ship))))))
 
 (defun remove-ship (ship)
   (setf *ships-placed* (remove ship *ships-placed*)))

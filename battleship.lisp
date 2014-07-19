@@ -82,13 +82,16 @@
 		       
 		       (:mousebuttondown 
 			(:x x :y y :button button)
+			(print x)
+			(print y)
+			(finish-output)
 			(ecase (game-state-current-screen *game-state*)
 			  (:waiting-for-opponent)
 			  (:place-ships
 			   (multiple-value-bind (v1 v2)  (get-3d-ray-under-mouse (ensure-float x) (ensure-float (- *window-height* y)))
 			     (let ((location (player-field-ray-intersect v1 v2)))
 			       (if location 
-				 (place-ship v1 v2 location (if (eql button 1) :vertical :horizontal))
+				 (place-ship v1 v2 location (if (eql button 1) :vertical :horizontal) :remove t)
 				 ;; if not player field than maybe ready button
 				 (when (ready-button-ray-intersect v1 v2)
 				   (ready-for-match))))))

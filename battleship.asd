@@ -9,16 +9,21 @@
 	       #:cl-opengl
 	       #:sdl2
 	       #:usocket
-               #:userial)
+               #:userial
+	       #:cl-cairo2)
   :components ((:file "package")
 	       (:file "game-state")
 	       (:module "graphics"
 			:components ((:file "utils")
+				     (:file "buffer")
+				     (:file "texture")
 				     (:file "camera")
 				     (:file "pipeline")
 				     (:file "technique")
 				     (:file "color-technique")
-				     (:file "primative")))
+				     (:file "primative")
+				     (:file "text-billboard")
+				     ))
 	       (:module "network"
 			:components ((:file "common")
 				     (:file "server")

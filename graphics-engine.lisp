@@ -17,13 +17,15 @@
     :accessor proj-info)
    (pipeline)
    (quad)
-   (circle)))
+   (circle)
+   (waiting-message)
+   (ready-button-message)))
 
 (defgeneric graphics-init (graphics-engine))
 (defgeneric render-scene (graphics-engine))
 
 (defmethod graphics-init ((tut graphics-engine))
-  (with-slots (pipeline quad circle) tut
+  (with-slots (pipeline quad circle waiting-message ready-button-message) tut
 
     (gl:clear-color 0.0 0.0 0.0 1.0)
     (gl:enable :depth-test)
@@ -36,10 +38,13 @@
     (setf quad (make-instance 'quad))
     
     ;; used for pings and missiles
-    (setf circle (make-instance 'circle))))
+    (setf circle (make-instance 'circle))
+    
+    (setf waiting-message (make-instance 'text-billboard :text "Waiting for opponent"))
+    (setf ready-button-message (make-instance 'text-billboard :text "Ready"))))
 
 (defmethod render-scene ((tut graphics-engine))
-  (with-slots (pipeline quad circle) tut
+  (with-slots (pipeline quad circle waiting-message ready-button-message) tut
 
     (gl:clear :color-buffer-bit :depth-buffer-bit)
 
@@ -66,7 +71,7 @@
        (setf (world-pos pipeline) (sb-cga:vec 0.0 0.0 -1.0))
        (setf (scale pipeline) (sb-cga:vec 200.0 50.0 1.0))
        (update-transforms pipeline)
-       (quad-render quad (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.0 0.5 0.0)))
+       (text-billboard-render waiting-message (projection-transform pipeline) (model-view-transform pipeline)))
       
       (:place-ships
        
@@ -103,7 +108,7 @@
        (setf (world-pos pipeline) (sb-cga:vec 200.0 0.0 19.0))
        (setf (scale pipeline) (sb-cga:vec 50.0 25.0 1.0))
        (update-transforms pipeline)
-       (quad-render quad (projection-transform pipeline) (model-view-transform pipeline) (sb-cga:vec 0.0 0.5 0.0)))
+       (text-billboard-render ready-button-message (projection-transform pipeline) (model-view-transform pipeline)))
       
       (:game-play
 
