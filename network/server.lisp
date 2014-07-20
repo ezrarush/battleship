@@ -18,7 +18,7 @@
   (assert *server-socket*)
   (usocket:socket-close *server-socket*)
   (setf *server-socket* nil
-	*players* nil))
+	*db* (make-hash-table)))
 
 (defun accept-client ()
   (when (usocket:wait-for-input *server-socket*
@@ -27,7 +27,6 @@
     (make-player (usocket:socket-accept *server-socket*))))
 
 (defun handle-message-from-client (message)
-  (finish-output)
   (userial:with-buffer message
     (ecase (userial:unserialize :client-opcode)
       (:login      (handle-login-message message))
@@ -42,22 +41,22 @@
 			      (format t "~a has joined the server~%" name)
 			      (finish-output)
 			      (setf (name *current-player*) name)
-			      (match-or-queue name))))
+			      (match-or-queue))))
 
-(defun match-or-queue (name)
-  ;; this whole function and *current-player* seems too hackish
+(defun match-or-queue ()
   (setf (ships *current-player*) 5)
   (setf (energy *current-player*) 10.0)
   (setf (missiles *current-player*) 20)
-  (when (eql (length *players*) 2)
-    (format t "2 players logged in: starting match.~%")
-    (finish-output)
-    
-    (setf (opponent (second *players*)) (name (first *players*)))
-    (setf (opponent (first *players*)) (name (second *players*)))
+  
+  (when (eql (hash-table-count *db*) 2)
 
-    (send-message (socket-connection (second *players*)) (make-welcome-message 40 5 10.0 20 (opponent (second *players*))))
-    (send-message (socket-connection (first *players*)) (make-welcome-message 40 5 10.0 20 (opponent (first *players*))))))
+    (setf (opponent (lookup-object-by-id 2)) 1)
+    (setf (opponent (lookup-object-by-id 1)) 2)
+
+    (send-message (socket-connection (lookup-object-by-id 2)) 
+		  (make-welcome-message 40 5 10.0 20 (name (lookup-object-by-id (opponent (lookup-object-by-id 2))))))
+    (send-message (socket-connection (lookup-object-by-id 1)) 
+		  (make-welcome-message 40 5 10.0 20 (name (lookup-object-by-id (opponent (lookup-object-by-id 1))))))))
 
 (defun make-welcome-message (squares ships energy missiles opponent)
   (userial:with-buffer (userial:make-buffer)
@@ -81,10 +80,10 @@
 (defun add-ship-to-map (x y &key is-vertical)
   (push (list x y is-vertical) (placed-ships *current-player*))
   (let ((flag nil))
-    (loop for player in *players* do
+    (loop for player being the hash-values in *db* do
 	 (when (< (length (placed-ships player)) 5) (setf flag t)))
     (unless flag 
-      (loop for player in *players* do
+      (loop for player being the hash-values in *db* do
 	   (send-message (socket-connection player) (make-match-begin-message))))))
 
 (defun make-match-begin-message ()
@@ -99,10 +98,9 @@
 (defun calculate-ping-response (radius ping-x ping-y)
   (format t "ping message received from ~a~%" (name *current-player*))
   (finish-output)
-  (let (;; this only works because *players* is always length 2
-	(opponents (remove *current-player* *players*))
+  (let ((opponent (lookup-object-by-id (opponent *current-player*)))
 	(hits '()))
-    (loop for ship in (placed-ships (pop opponents)) do
+    (loop for ship in (placed-ships opponent) do
 	 (let ((d (distance ping-x ping-y (first ship) (second ship))))
 	   (when (< d radius)
 	     (push d hits))))
@@ -125,10 +123,9 @@
 (defun calculate-fire-response (missile-x missile-y)
   (format t "fire message received from ~a~%" (name *current-player*))
   (finish-output)
-  (let (;; this only works because *players* is always length 2
-	(opponents (remove *current-player* *players*))
+  (let ((opponent (lookup-object-by-id (opponent *current-player*)))
 	(hit nil))
-    (loop for ship in (placed-ships (first opponents)) do
+    (loop for ship in (placed-ships opponent) do
 	 (let ((ship-x (first ship))
 	       (ship-y (second ship))
 	       (half-width (if (third ship) 6.0 24.0))
@@ -139,7 +136,7 @@
 		      (<= (- missile-y missile-radius) (+ ship-y half-height))
 		      (>= (+ missile-y missile-radius) (- ship-y half-height)))
 	     (setf hit t))))
-    (send-message (socket-connection (first opponents)) (make-sunk-message missile-x missile-y))
+    (send-message (socket-connection opponent) (make-sunk-message missile-x missile-y))
     (send-message (socket-connection *current-player*) (make-shot-results-message hit))))
 
 (defun make-shot-results-message (hit)

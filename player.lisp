@@ -1,8 +1,6 @@
 (in-package #:battleship)
 
-(defvar *players* nil)
-
-(defclass player ()
+(defclass player (db-object)
   ((connection 
     :initarg :socket-connection
     :accessor socket-connection)
@@ -31,4 +29,4 @@
     :accessor placed-ships)))
 
 (defun make-player (socket-connection)
-  (push (make-instance 'player :socket-connection socket-connection) *players*))
+  (make-instance 'player :socket-connection socket-connection))

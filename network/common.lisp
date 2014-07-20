@@ -14,8 +14,9 @@
 
 (userial:make-enum-serializer :shot-result (:hit :miss))
 
+;; no players in *db* means no one is connected to the server
 (defun connected-p ()
-  (or *players*
+  (or (> (hash-table-count *db*) 0)
       *server-connection*))
 
 (defun send-message (to buffer)

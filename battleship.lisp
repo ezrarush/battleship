@@ -1,8 +1,8 @@
 ;;;; battleship.lisp
 
-(in-package #:battleship)
-
 (declaim (optimize (debug 3) (speed 1) (safety 3)))
+
+(in-package #:battleship)
 
 (defparameter *window-width* 800)
 (defparameter *window-height* 600)
@@ -42,12 +42,12 @@
 		  (setf *delta-time* (ensure-float (- *current-time* *last-time*)))
 		  (when (>= *delta-time* 10.0)
 		    (incf *last-time* 10))
-		  
-		  ;; Currently only two clients may :login to the server
-		  (when (< (length *players*) 2)
+
+		  ;; currently only two clients may :login to the server
+		  (when (< (hash-table-count *db*) 2)
 		    (accept-client))
 
-		  (loop for player in *players* do
+		  (loop for player being the hash-values in *db* do
 		       (setf *current-player* player)
 		       (read-message (socket-connection player)))
 		  (setf *current-player* nil))
