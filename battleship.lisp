@@ -43,9 +43,7 @@
 		  (when (>= *delta-time* 10.0)
 		    (incf *last-time* 10))
 
-		  ;; currently only two clients may :login to the server
-		  (when (< (hash-table-count *db*) 2)
-		    (accept-client))
+		  (accept-client)
 
 		  (loop for player being the hash-values in *db* do
 		       (setf *current-player* player)

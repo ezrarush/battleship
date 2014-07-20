@@ -7,8 +7,6 @@ A modern OpenGL networked real time battleship game meant to be a working exampl
 
 Changes made to the protocol:
 
-- Only two clients may login to the server so the opponent parts have been removed from the login and welcome messages.
-- Only one board size implemented (i.e. :medium).
 - Ships will be placed on a field of floats and not integers because OpenGL uses floats.
 - :match-begin added to :server-opcode to signal the end of ship placement and the beginning of game play 
 - Sunk message is sent to opponent regardless of hit so that enemy fire can be displayed.

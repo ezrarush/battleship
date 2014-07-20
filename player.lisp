@@ -4,6 +4,9 @@
   ((connection 
     :initarg :socket-connection
     :accessor socket-connection)
+   (state
+    :initform :new
+    :accessor state)
    (name 
     :initarg :name
     ;; :initform (error ":name required")
@@ -25,7 +28,7 @@
     ;; :initform (error ":opponent required")
     :accessor opponent)
    (placed-ships
-    :initform nil
+    :initform '()
     :accessor placed-ships)))
 
 (defun make-player (socket-connection)
