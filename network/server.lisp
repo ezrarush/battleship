@@ -36,29 +36,84 @@
 
 (defun handle-login-message (message)
   (userial:with-buffer message
-    (userial:unserialize-let* (:string name)
+    (userial:unserialize-let* (:string name
+			       :boolean has-opponent)
 			      (assert (plusp (length name)))
 			      (format t "~a has joined the server~%" name)
 			      (finish-output)
-			      (setf (name *current-player*) name)
-			      (setf (state *current-player*) :waiting-for-opponent)
-			      (match-or-queue))))
+			      (cond
+				(has-opponent (userial:unserialize-let* (:string opponent)
+									(match-or-queue name opponent)))
+				(t
+				 (match-or-queue name))))))
 
-(defun match-or-queue ()
+(defun match-or-queue (name &optional opponent)
+  (setf (name *current-player*) name)
   (setf (ships *current-player*) 5)
   (setf (energy *current-player*) 10.0)
   (setf (missiles *current-player*) 20)
-  (loop for player being the hash-values in *db* do
-       (unless (eql player *current-player*)
-	 (when (eql (state player) :waiting-for-opponent)
-	   (setf (opponent *current-player*) (object-id player))
-	   (setf (opponent player) (object-id *current-player*))
-	   (setf (state *current-player*) :playing-match)
-	   (setf (state player) :playing-match)
-	   (send-message (socket-connection *current-player*) 
-			 (make-welcome-message 40 5 10.0 20 (name player)))
-	   (send-message (socket-connection player) 
-			 (make-welcome-message 40 5 10.0 20 (name *current-player*)))))))
+  (if opponent
+      (progn
+	(setf (opponent-name *current-player*) opponent)
+	(setf (state *current-player*) :waiting-for-opponent)
+	(loop for player being the hash-values in *db* do
+	     (unless (eql player *current-player*) 
+	       ;; equalp is not case-sensitive
+	       (when (equalp (name player) opponent)
+		 (if (eql (state player) :waiting-for-anyone)
+		     (progn
+		       (setf (opponent-id *current-player*) (object-id player))
+		       (setf (opponent-id player) (object-id *current-player*))
+		       (setf (state *current-player*) :playing-match)
+		       (setf (state player) :playing-match)
+		       (send-message (socket-connection *current-player*) 
+				     (make-welcome-message 40 5 10.0 20 (name player)))
+		       (send-message (socket-connection player) 
+				     (make-welcome-message 40 5 10.0 20 (name *current-player*)))
+		       (return))
+		     (progn
+		       (when (and (eql (state player) :waiting-for-opponent) (equalp (opponent-name player) (name *current-player*)))
+			 (setf (opponent-id *current-player*) (object-id player))
+			 (setf (opponent-id player) (object-id *current-player*))
+			 (setf (state *current-player*) :playing-match)
+			 (setf (state player) :playing-match)
+			 (send-message (socket-connection *current-player*) 
+				       (make-welcome-message 40 5 10.0 20 (name player)))
+			 (send-message (socket-connection player) 
+				       (make-welcome-message 40 5 10.0 20 (name *current-player*)))
+			 (return))))))))
+      (progn
+	(setf (state *current-player*) :waiting-for-anyone)
+	(unless
+	    (loop for player being the hash-values in *db* do
+		 (progn (unless (eql player *current-player*)
+			  (when (and (eql (state player) :waiting-for-opponent) (equalp (opponent-name player) (name *current-player*)))
+			    (setf (opponent-name *current-player*) (name player))
+			    (setf (opponent-name player) (name *current-player*))
+			    (setf (opponent-id *current-player*) (object-id player))
+			    (setf (opponent-id player) (object-id *current-player*))
+			    (setf (state *current-player*) :playing-match)
+			    (setf (state player) :playing-match)
+			    (send-message (socket-connection *current-player*) 
+					  (make-welcome-message 40 5 10.0 20 (name player)))
+			    (send-message (socket-connection player) 
+					  (make-welcome-message 40 5 10.0 20 (name *current-player*)))
+			    (return t)))
+			nil))
+	  (loop for player being the hash-values in *db* do
+	       (unless (eql player *current-player*)
+		 (when (eql (state player) :waiting-for-anyone)
+		   (setf (opponent-name *current-player*) (name player))
+		   (setf (opponent-name player) (name *current-player*))
+		   (setf (opponent-id *current-player*) (object-id player))
+		   (setf (opponent-id player) (object-id *current-player*))
+		   (setf (state *current-player*) :playing-match)
+		   (setf (state player) :playing-match)
+		   (send-message (socket-connection *current-player*) 
+				 (make-welcome-message 40 5 10.0 20 (name player)))
+		   (send-message (socket-connection player) 
+				 (make-welcome-message 40 5 10.0 20 (name *current-player*)))
+		   (return))))))))
 
 (defun make-welcome-message (squares ships energy missiles opponent)
   (userial:with-buffer (userial:make-buffer)
@@ -81,12 +136,11 @@
 
 (defun add-ship-to-map (x y &key is-vertical)
   (push (list x y is-vertical) (placed-ships *current-player*))
-  (let ((flag nil))
-    (loop for player being the hash-values in *db* do
-	 (when (< (length (placed-ships player)) 5) (setf flag t)))
-    (unless flag 
-      (loop for player being the hash-values in *db* do
-	   (send-message (socket-connection player) (make-match-begin-message))))))
+
+  (let ((opponent (lookup-object-by-id (opponent-id *current-player*))))
+    (when (and (eql (length (placed-ships *current-player*)) 5) (eql (length (placed-ships opponent)) 5))
+      (send-message (socket-connection *current-player*) (make-match-begin-message))
+      (send-message (socket-connection opponent) (make-match-begin-message)))))
 
 (defun make-match-begin-message ()
   (userial:with-buffer (userial:make-buffer)
@@ -100,7 +154,7 @@
 (defun calculate-ping-response (radius ping-x ping-y)
   (format t "ping message received from ~a~%" (name *current-player*))
   (finish-output)
-  (let ((opponent (lookup-object-by-id (opponent *current-player*)))
+  (let ((opponent (lookup-object-by-id (opponent-id *current-player*)))
 	(hits '()))
     (loop for ship in (placed-ships opponent) do
 	 (let ((d (distance ping-x ping-y (first ship) (second ship))))
@@ -125,7 +179,7 @@
 (defun calculate-fire-response (missile-x missile-y)
   (format t "fire message received from ~a~%" (name *current-player*))
   (finish-output)
-  (let ((opponent (lookup-object-by-id (opponent *current-player*)))
+  (let ((opponent (lookup-object-by-id (opponent-id *current-player*)))
 	(hit nil))
     (loop for ship in (placed-ships opponent) do
 	 (let ((ship-x (first ship))

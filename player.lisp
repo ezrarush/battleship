@@ -23,10 +23,13 @@
     :initarg :missiles
     ;; :initform (error ":missiles required")
     :accessor missiles)
-   (opponent 
-    :initarg :opponent
+   (opponent-name
+    :initarg :opponent-name
+    :accessor opponent-name)
+   (opponent-id 
+    :initarg :opponent-id
     ;; :initform (error ":opponent required")
-    :accessor opponent)
+    :accessor opponent-id)
    (placed-ships
     :initform '()
     :accessor placed-ships)))

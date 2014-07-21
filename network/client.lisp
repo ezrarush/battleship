@@ -38,10 +38,13 @@
     (format t "~a~%" (game-state-opponent *game-state*))
     (finish-output)))
 
-(defun make-login-message (name)
+(defun make-login-message (name &key opponent)
   (userial:with-buffer (userial:make-buffer)
-    (userial:serialize* :client-opcode      :login
-			:string               name)
+    (userial:serialize* :client-opcode :login
+			:string        name
+			:boolean       (if opponent t nil))
+    (when opponent
+      (userial:serialize :string opponent))
     (userial:get-buffer)))
 
 (defun make-place-ship-message (x y orientation)
