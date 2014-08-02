@@ -27,8 +27,6 @@ Install SBCL and Quicklisp in C:\home\ (https://www.youtube.com/watch?v=VnWVu8VV
 
 Download this repository and place it in your quicklisp\local-projects\ folder so that quicklisp can find it.  
 
-SBCL does not have a safe way to interrupt a thread and cl-sdl2 must run on the main thread. Here is the work around found at https://github.com/lispgames/cl-sdl2/issues/23
-
 ###Server
 
 Run the following in the command line from the project folder:
@@ -58,3 +56,7 @@ sbcl --load battleship-client-two.lisp
 ```
 
 If player two is on a different host than the server, modify battleship-client-two.lisp to use the server's ip address instead of the loop back address "127.0.0.1".
+
+##Run Scripts Explained
+
+The reason battleship-server.lisp, battleship-client-one.lisp, and battleship-client-two.lisp has (sdl2:make-this-thread-main (lambda () (battleship:main))) is because SBCL does not have a safe way to interrupt a thread and cl-sdl2 must run on the main thread. Here is the work around found at https://github.com/lispgames/cl-sdl2/issues/23
