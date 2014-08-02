@@ -31,35 +31,30 @@ SBCL does not have a safe way to interrupt a thread and cl-sdl2 must run on the 
 
 ###Server
 
-Run the following from the SBCL shell started in the same folder quicklisp is installed in (e.g. your home folder c:\home\) so that the project can load shader files from the relative path "quicklisp\local-projects\battleship\shaders\".
+Run the following in the command line from the project folder:
 
-```lisp
-(ql:quickload "battleship")
-; (ql:quickload "swank")
-; (bt:make-thread (lambda () (swank:create-server :port 4005 :dont-close t)))
-(sdl2:make-this-thread-main (lambda () (battleship:main)))
+```
+sbcl --load battleship-server.lisp
 ```
 
-You may use slime with this SBCL image by uncommenting the two swank lines and executing the command "slime-connect" in emacs.
+You may use slime with this SBCL image by uncommenting the two swank lines inside the battleship-server.lisp file and executing the command "slime-connect" in emacs.
 
 ### Player One 
 
-Run the following in a second SBCL instance shell started in the same folder quicklisp is installed in (e.g. your home folder c:\home\) so that the project can load shader files from the relative path "quicklisp\local-projects\battleship\shaders\".
+Run the following in a second command line instance from the project folder:
 
 ```lisp
-(ql:quickload "battleship")
-(sdl2:make-this-thread-main (lambda () (battleship:main :server-p nil :server-ip "127.0.0.1" :name "Ranma Saotome")))
+sbcl --load battleship-client-one.lisp
 ```
 
-If player one is on a different host than the server, use the server's ip address instead of the loop back address "127.0.0.1".
+If player one is on a different host than the server, modify battleship-client-one.lisp to use the server's ip address instead of the loop back address "127.0.0.1".
 
 ### Player Two
 
-Run the following in a third SBCL instance shell started in the same folder quicklisp is installed in (e.g. your home folder c:\home\) so that the project can load shader files from the relative path "quicklisp\local-projects\battleship\shaders\".
+Run the following in a third command line instance from the project folder:
 
 ```lisp
-(ql:quickload "battleship")
-(sdl2:make-this-thread-main (lambda () (battleship:main :server-p nil :server-ip "127.0.0.1" :name "Akane Tendo")))
+sbcl --load battleship-client-two.lisp
 ```
 
-If player two is on a different host than the server, use the server's ip address instead of the loop back address "127.0.0.1".
+If player two is on a different host than the server, modify battleship-client-two.lisp to use the server's ip address instead of the loop back address "127.0.0.1".
