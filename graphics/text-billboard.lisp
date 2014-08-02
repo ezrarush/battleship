@@ -78,7 +78,7 @@
 	    (gl:bind-texture :texture-2d 0)
 	    (gl:bind-buffer :pixel-unpack-buffer 0)))
     
-    (setf technique (make-instance 'color-technique :vs-path "/home/quicklisp/local-projects/battleship/shaders/text-billboard.vertexshader" :fs-path "/home/quicklisp/local-projects/battleship/shaders/text-billboard.fragmentshader"))))
+    (setf technique (make-instance 'color-technique :vs-path "~/quicklisp/local-projects/battleship/shaders/text-billboard.vertexshader" :fs-path "~/quicklisp/local-projects/battleship/shaders/text-billboard.fragmentshader"))))
 
 (defmethod text-billboard-render ((self text-billboard) projection-transform model-view-transform)
   (with-slots (vertex-buffer texture technique) self
