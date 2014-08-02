@@ -151,14 +151,14 @@
 (defun enemy-field-ray-intersect (v1 v2)
   (let ((distance (or (ray-triangle-collision v1 
 					      (sb-cga:vec- v1 v2) 
-					      (sb-cga:vec   4.0  196.0 19.0)
-					      (sb-cga:vec   4.0 -196.0 19.0)
-					      (sb-cga:vec 396.0  196.0 19.0))
+					      (sb-cga:vec 4.0                            (- (/ (- *window-height* 200.0) 2.0) 4.0) 19.0)
+					      (sb-cga:vec 4.0                            (- (- (/ (- *window-height* 200.0) 2.0) 4.0)) 19.0)
+					      (sb-cga:vec (- (/ *window-width* 2.0) 4.0) (- (/ (- *window-height* 200.0) 2.0) 4.0) 19.0))
 		      (ray-triangle-collision v1 
 					      (sb-cga:vec- v1 v2)
-					      (sb-cga:vec   4.0 -196.0 19.0)
-					      (sb-cga:vec 396.0 -196.0 19.0)
-					      (sb-cga:vec 396.0  196.0 19.0)))))
+					      (sb-cga:vec 4.0                            (- (- (/ (- *window-height* 200.0) 2.0) 4.0)) 19.0)
+					      (sb-cga:vec (- (/ *window-width* 2.0) 4.0) (- (- (/ (- *window-height* 200.0) 2.0) 4.0)) 19.0)
+					      (sb-cga:vec (- (/ *window-width* 2.0) 4.0) (- (/ (- *window-height* 200.0) 2.0) 4.0) 19.0)))))
     (when distance
       ;; calculate click location on field
       (sb-cga:vec+ v1 (sb-cga:vec* (sb-cga:vec- v1 v2) distance)))))
@@ -166,14 +166,14 @@
 (defun player-field-ray-intersect (v1 v2)
   (let ((distance (or (ray-triangle-collision v1 
 					      (sb-cga:vec- v1 v2) 
-					      (sb-cga:vec   -4.0  196.0 9.0)
-					      (sb-cga:vec -396.0  196.0 9.0)
-					      (sb-cga:vec -396.0 -196.0 9.0))
+					      (sb-cga:vec -4.0                                (- (/ (- *window-height* 200.0) 2.0) 4.0) 9.0)
+					      (sb-cga:vec  (- (- (/ *window-width* 2.0) 4.0)) (- (/ (- *window-height* 200.0) 2.0) 4.0) 9.0)
+					      (sb-cga:vec  (- (- (/ *window-width* 2.0) 4.0)) (- (- (/ (- *window-height* 200.0) 2.0) 4.0)) 9.0))
 		      (ray-triangle-collision v1 
 					      (sb-cga:vec- v1 v2)
-					      (sb-cga:vec   -4.0   196.0 9.0)
-					      (sb-cga:vec -396.0 -196.0 9.0)
-					      (sb-cga:vec   -4.0 -196.0 9.0)))))
+					      (sb-cga:vec -4.0                                (- (/ (- *window-height* 200.0) 2.0) 4.0) 9.0)
+					      (sb-cga:vec  (- (- (/ *window-width* 2.0) 4.0)) (- (- (/ (- *window-height* 200.0) 2.0) 4.0)) 9.0)
+					      (sb-cga:vec -4.0                                (- (- (/ (- *window-height* 200.0) 2.0) 4.0)) 9.0)))))
     (when distance
       ;; calculate click location on field
       (sb-cga:vec+ v1 (sb-cga:vec* (sb-cga:vec- v1 v2) distance)))))

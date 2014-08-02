@@ -43,7 +43,7 @@
       (gl:buffer-data :array-buffer :static-draw arr)
       (gl:free-gl-array arr))
     
-    (setf technique (make-instance 'color-technique :vs-path "/home/quicklisp/local-projects/battleship/shaders/shader.vertexshader" :fs-path "/home/quicklisp/local-projects/battleship/shaders/shader.fragmentshader"))))
+    (setf technique (make-instance 'color-technique :vs-path (pathname "quicklisp/local-projects/battleship/shaders/shader.vertexshader") :fs-path (pathname "quicklisp/local-projects/battleship/shaders/shader.fragmentshader")))))
 
 (defmethod quad-render ((self quad) projection-transform model-view-transform color)
   (with-slots (vertex-buffer technique) self
@@ -225,7 +225,7 @@
       (gl:buffer-data :array-buffer :static-draw arr)
       (gl:free-gl-array arr))
         
-    (setf technique (make-instance 'color-technique :vs-path "/home/quicklisp/local-projects/battleship/shaders/shader.vertexshader" :fs-path "/home/quicklisp/local-projects/battleship/shaders/shader.fragmentshader"))))
+    (setf technique (make-instance 'color-technique :vs-path (pathname "quicklisp/local-projects/battleship/shaders/shader.vertexshader") :fs-path (pathname "quicklisp/local-projects/battleship/shaders/shader.fragmentshader")))))
 
 (defmethod sphere-render ((self sphere) projection-transform model-view-transform color)
   (with-slots (vertex-buffer technique faces) self
