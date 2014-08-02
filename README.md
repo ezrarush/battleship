@@ -25,15 +25,13 @@ These changes may be reverted in a future update.
 
 Install SBCL and Quicklisp in C:\home\ (https://www.youtube.com/watch?v=VnWVu8VVDbI)
 
-Download this repository and place it in C:\home\quicklisp\local-projects\.  
-
-Shader paths are hard coded to this home folder (e.g. c:\home\quicklisp\local-projects\battleship\shaders\shader.vertexshader).
+Download this repository and place it in your quicklisp\local-projects\ folder so that quicklisp can find it.  
 
 SBCL does not have a safe way to interrupt a thread and cl-sdl2 must run on the main thread. Here is the work around found at https://github.com/lispgames/cl-sdl2/issues/23
 
 ###Server
 
-Run the following from the SBCL shell.
+Run the following from the SBCL shell started in the same folder quicklisp is installed in (e.g. your home folder c:\home\) so that the project can load shader files from the relative path "quicklisp\local-projects\battleship\shaders\".
 
 ```lisp
 (ql:quickload "battleship")
@@ -46,7 +44,7 @@ You may use slime with this SBCL image by uncommenting the two swank lines and e
 
 ### Player One 
 
-Run the following in a second SBCL instance shell.
+Run the following in a second SBCL instance shell started in the same folder quicklisp is installed in (e.g. your home folder c:\home\) so that the project can load shader files from the relative path "quicklisp\local-projects\battleship\shaders\".
 
 ```lisp
 (ql:quickload "battleship")
@@ -57,7 +55,7 @@ If player one is on a different host than the server, use the server's ip addres
 
 ### Player Two
 
-Run the following in a third SBCL instance shell.
+Run the following in a third SBCL instance shell started in the same folder quicklisp is installed in (e.g. your home folder c:\home\) so that the project can load shader files from the relative path "quicklisp\local-projects\battleship\shaders\".
 
 ```lisp
 (ql:quickload "battleship")
