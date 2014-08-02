@@ -1,6 +1,3 @@
-#WIP
-This project is not finished.
-
 #Description
 
 A modern OpenGL networked real time battleship game meant to be a working example of [userial's game protocol](https://github.com/nklein/userial#protocol).  
