@@ -41,7 +41,7 @@ You may use slime with this SBCL image by uncommenting the two swank lines insid
 
 Run the following in a second command line instance from the project folder:
 
-```lisp
+```
 sbcl --load battleship-client-one.lisp
 ```
 
@@ -51,12 +51,12 @@ If player one is on a different host than the server, modify battleship-client-o
 
 Run the following in a third command line instance from the project folder:
 
-```lisp
+```
 sbcl --load battleship-client-two.lisp
 ```
 
 If player two is on a different host than the server, modify battleship-client-two.lisp to use the server's ip address instead of the loop back address "127.0.0.1".
 
-##Run Scripts Explained
+##Note on Emacs Slime
 
-The reason battleship-server.lisp, battleship-client-one.lisp, and battleship-client-two.lisp has (sdl2:make-this-thread-main (lambda () (battleship:main))) is because SBCL does not have a safe way to interrupt a thread and cl-sdl2 must run on the main thread. Here is the work around found at https://github.com/lispgames/cl-sdl2/issues/23
+As Zulu-Inuoe commented in this [thread](https://github.com/lispgames/cl-sdl2/issues/23), when Emacs launches SBCL for slime on windows, it specifies that SBCL be launched in SW_HIDE (so you don't see the console for SBCL but this also hides the window SDL creates).
