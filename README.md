@@ -23,7 +23,7 @@ These changes may be reverted in a future update.
 
 ##SBCL on Windows
 
-Install SBCL and Quicklisp in C:\home\ (https://www.youtube.com/watch?v=VnWVu8VVDbI)
+Install SBCL and Quicklisp (https://www.youtube.com/watch?v=VnWVu8VVDbI)
 
 Download this repository and place it in your quicklisp\local-projects\ folder so that quicklisp can find it.  
 
@@ -57,6 +57,6 @@ sbcl --load battleship-client-two.lisp
 
 If player two is on a different host than the server, modify battleship-client-two.lisp to use the server's ip address instead of the loop back address "127.0.0.1".
 
-##Note on Emacs Slime
+###Note on Emacs Slime
 
 As Zulu-Inuoe commented in this [thread](https://github.com/lispgames/cl-sdl2/issues/23), when Emacs launches SBCL for slime on windows, it specifies that SBCL be launched in SW_HIDE (so you don't see the console for SBCL but this also hides the window SDL creates).

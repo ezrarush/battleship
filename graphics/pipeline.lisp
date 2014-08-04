@@ -32,13 +32,13 @@
     :initform (make-projection-info
 	       :height (ensure-float *window-height*)
 	       :width (ensure-float *window-width*)
-	       :z-near -500.0
-	       :z-far 500.0)
+	       :z-near 500.0
+	       :z-far -500.0)
     :accessor proj-info)
    (camera
     :initarg :camera
     :initform (make-instance 'camera 
-			     :pos (sb-cga:vec 0.0 0.0 -100.0) 
+			     :pos (sb-cga:vec 0.0 0.0 100.0) 
 			     :target (sb-cga:vec 0.0 0.0 0.0))
     :accessor camera)))
 
@@ -60,8 +60,8 @@
     
     (setf model-view-transform (sb-cga:matrix* view-transform world-transform))
 
-    (setf projection-transform (ortho (/ (projection-info-width proj-info) 2.0) 
-    				      (- (/ (projection-info-width proj-info) 2.0)) 
+    (setf projection-transform (ortho (- (/ (projection-info-width proj-info) 2.0)) 
+    				      (/ (projection-info-width proj-info) 2.0) 
     				      (- (/ (projection-info-height proj-info) 2.0)) 
     				      (/ (projection-info-height proj-info) 2.0) 
     				      (projection-info-z-near proj-info)
