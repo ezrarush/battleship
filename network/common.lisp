@@ -1,7 +1,7 @@
 (in-package #:battleship)
 
 (userial:make-enum-serializer :client-opcode
-                      (:login :place-ship :ping :fire))
+                      (:login :place-ship :ping :fire :logout))
 
 (userial:make-enum-serializer :server-opcode
                       (:welcome :match-begin :ack :sunk :shot-results))

@@ -32,7 +32,8 @@
       (:login      (handle-login-message message))
       (:place-ship (handle-place-ship-message message))
       (:ping       (handle-ping-message message))
-      (:fire       (handle-fire-message message)))))
+      (:fire       (handle-fire-message message))
+      (:logout     (handle-logout-message)))))
 
 (defun handle-login-message (message)
   (userial:with-buffer message
@@ -206,3 +207,5 @@
 			:float32           x
 			:float32           y)))
 
+(defun handle-logout-message ()
+  (remove-object-from-db *current-player*))

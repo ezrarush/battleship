@@ -7,11 +7,14 @@
 	(usocket:socket-connect server-ip
 				port
 				:element-type '(unsigned-byte 8))))
+
+
 (defun disconnect-from-server ()
   (assert *server-connection*)
+  (send-message *server-connection* (userial:with-buffer (userial:make-buffer)
+				      (userial:serialize :client-opcode :logout)))
   (usocket:socket-close *server-connection*)
   (setf *server-connection* nil))
-
 
 (userial:make-accessor-serializer (:game-state-from-welcome welcome-state (make-game-state))
   :uint8   game-state-board-size
@@ -81,7 +84,6 @@
       (loop repeat hit-number do
 	   ;; hit pos has less depth so that it is on top of ping
 	   (push (list (sb-cga:vec+ (pos *ping*) (sb-cga:vec 0.0 0.0 -1.0)) (userial:unserialize :float32)) *ping-hits*)))))
-
 
 (defun make-fire-message (x y)
   (userial:with-buffer (userial:make-buffer)

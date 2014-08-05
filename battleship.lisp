@@ -29,7 +29,6 @@
 
     (setf *server* server-p)
     (if (server-p)
-	
 	(progn
 	  (start-server server-ip port)
 	  (setf *last-time* (sdl2:get-ticks))       
@@ -52,7 +51,6 @@
 		 
 		 (:quit () t))
 	    (stop-server)))
-
 	(progn
 	  (connect-to-server server-ip port)
 	  (when (connected-p)
@@ -65,7 +63,6 @@
 		(setf *last-time* (sdl2:get-ticks))	      
 		(unwind-protect
 		     (sdl2:with-event-loop (:method :poll)
-		       
 		       (:keydown
 			(:keysym keysym)
 			(let ((scancode (sdl2:scancode-value keysym))
@@ -75,9 +72,7 @@
 			  (:waiting-for-opponent)
 			  (:place-ships)
 			  (:game-play)
-			  (:end-score))
-			)
-		       
+			  (:end-score)))
 		       (:mousebuttondown 
 			(:x x :y y :button button)
 			(print x)
@@ -104,7 +99,6 @@
 				       (setf *right-click-toggle* t))
 				     (fire-missile v1 v2 location))))))
 			  (:end-score)))
-
 		       (:mousebuttonup
 			()
 			(ecase (game-state-current-screen *game-state*)
@@ -131,21 +125,16 @@
 				   ;; new radius is distance of mouse from pos
 				   (setf (radius *ping*) (distance (aref location 0) (aref location 1) (aref pos 0) (aref pos 1))))))))
 			  (:end-score)))
-		       
 		       (:idle 
 			()
 			(setf *current-time* (sdl2:get-ticks))
 			(setf *delta-time* (ensure-float (- *current-time* *last-time*)))
 			(when (>= *delta-time* 10.0)
 			  (incf *last-time* 10))
-			
 			(read-message *server-connection*)
-			
 			(render-scene *graphics-engine*)
-			(sdl2:gl-swap-window win)		     
-			)
+			(sdl2:gl-swap-window win)		     )
 		       (:quit () t))
-		  
 		  (disconnect-from-server)))))))))
 
 (defun enemy-field-ray-intersect (v1 v2)

@@ -21,10 +21,10 @@
     (assert (not (id-in-use-p id)))
     (setf (gethash id *db*) object)))
 
-(defun remove-object-form-db (object)
+(defun remove-object-from-db (object)
   (let ((id (object-id object)))
     (assert (eql (lookup-object-by-id id) object))
-    (remhash id *global-oid-table*)))
+    (remhash id *db*)))
 
 ;; the objects that will be put into the *db*
 
