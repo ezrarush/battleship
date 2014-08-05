@@ -7,6 +7,7 @@ Changes made to the protocol:
 - Ships will be placed on a field of floats and not integers because OpenGL uses floats.
 - :match-begin added to :server-opcode to signal the end of ship placement and the beginning of game play 
 - Sunk message is sent to opponent regardless of hit so that enemy fire can be displayed.
+- :logout added to :client-opcode so server can remove players from the *db* (maybe handling stream eof condition is better?)
 - Typographical errors corrected to keep naming consistent throughout the code (e.g. :client-opcodes and :server-opcodes changed to :client-opcode and :server-opcode respectively)
 
 These changes may be reverted in a future update.
